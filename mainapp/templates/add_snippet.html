@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+	<div class="container">
+    <div class="row">
+        <div class="col">
+            <h1>{{ pagename }}</h1>
+            <hr>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <form action="" method="post">
+                {{ form.as_p }}
+                {% csrf_token %}
+                <div class="form-group row">
+                    <div class="col-8">
+                        <input type="submit" class="btn btn-primary btn-block" value="Сохранить">
+                    </div>
+                </div>
+            </form>
+                <a href="{% url 'home' %}">Назад к главной</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

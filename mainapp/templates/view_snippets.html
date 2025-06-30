@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col text-center">
+                <h1>{{ pagename }}</h1>
+                <hr>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <p>На данной страницы будут отображаться все созданные сниппеты.</p>
+                <p>Пока тут просто пример, но скоро заменим реальными сниппетами из БД!</p>
+                <hr>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <table class="table table-striped">
+                    <thead class="table-dark">
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Название</th>
+                        <th scope="col">Дата создания</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+
+                    {% for snippet in snippets %}
+                        <tr>
+                            <td scope="row">{{ snippet.id }}</td>
+                            <td><a href="{% url 'snippet-detail' snippet.id %}">{{ snippet.name }}</a></td>
+                            <td>{{ snippet.creation_date }}</td>
+                        </tr>
+                    {% endfor %}
+
+                    </tbody>
+                </table>
+                <div class="d-flex justify-content-end">
+                    <i class="text-muted">Всего сниппетов: 2</i></div>
+            </div>
+        </div>
+        <a href="{% url 'home' %}">Назад к главной</a>
+    </div>
+
+{% endblock %}
