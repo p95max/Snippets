@@ -11,6 +11,7 @@ class SnippetForm(forms.ModelForm):
             'lang': 'Язык программирования',
             'code': 'Код',
         }
+
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите название'}),
             'lang': forms.Select(attrs={'class': 'form-control'}),
