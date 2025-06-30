@@ -1,32 +1,28 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <div class="container">
+<div class="container">
     <div class="row">
         <div class="col">
             <fieldset disabled>
-        <div class="row disabled">
-            <div class="col col-8">
-                Название: <input type="text" value="{{ snippet.name }}" class="form-control">
-            </div>
-            <div class="col col-4">
-                Дата создания:<input type="text" value="{{ snippet.creation_date}}" class="form-control">
-            </div>
-        </div>
-        <hr>
-        <div class="row">
-            <div class="col">
-                <div class="p-2 h-100" style="border:1px solid #ced4da; border-radius:5px;">
-                    <p>
-                        {{ snippet.code }}
-                    </p>
+                <div class="row disabled">
+                    <div class="col col-8">
+                        Название: <input type="text" value="{{ snippet.name }}" class="form-control">
+                    </div>
+                    <div class="col col-4">
+                        Дата создания: <input type="text" value="{{ snippet.creation_date }}" class="form-control">
+                    </div>
                 </div>
-            </div>
-        </div>
-    </fieldset>
+                <hr>
+                <div class="row">
+                    <div class="col">
+                        <div class="p-2 h-100" style="border:1px solid #ced4da; border-radius:5px; background-color: #1e1e1e; color: #f8f8f2; font-family: monospace; white-space: pre-wrap;">
+                            <pre style="margin: 0; text-align: left">{{ snippet.code }}</pre>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
         </div>
     </div>
-            <a href="{% url 'home' %}">Назад к главной</a>
-    </div>
-
+</div>
 {% endblock %}
