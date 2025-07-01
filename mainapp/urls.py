@@ -7,7 +7,7 @@ urlpatterns = [
     path('', index_page, name="home"),
     path('snippets/list', snippets_page, name="snippets-list"),
     path('snippet/<int:id>', snippet_detail, name="snippet-detail"),
-
+#CRUD
     path('snippets/add', add_snippet_page, name="snippet-add"),
     path('snippet/<int:pk>/edit', edit_snippet_page, name="snippet-edit"),
     path('snippet/<int:pk>/delete', delete_snippet_page, name="snippet-delete"),

@@ -1,5 +1,5 @@
 from django import forms
-from mainapp.models import Snippet
+from mainapp.models import Snippet, LANG_CHOICES
 
 
 class SnippetForm(forms.ModelForm):
@@ -11,9 +11,14 @@ class SnippetForm(forms.ModelForm):
             'lang': 'Язык программирования',
             'code': 'Код',
         }
-
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите название'}),
-            'lang': forms.Select(attrs={'class': 'form-control'}),
+            'lang': forms.Select(attrs={'class': 'form-control'}, choices=LANG_CHOICES),
             'code': forms.Textarea(attrs={'class': 'form-control', 'rows': 10, 'placeholder': 'Введите код'}),
         }
+
+    def clean_name(self):
+        name = self.cleaned_data['name']
+        if len(name) < 5:
+            raise forms.ValidationError('Имя слишком короткое(должно быть минимум 3 символа)')
+        return name

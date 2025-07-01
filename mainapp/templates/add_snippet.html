@@ -4,6 +4,7 @@
 {% block title %} Добавить запись {% endblock %}
 
 {% block content %}
+
     <h3> Добавить запись </h3>
 
 <div class="container d-flex justify-content-center mt-5">
@@ -13,8 +14,12 @@
     {{ form|crispy }}
     <button type="submit" class="btn btn-primary">Добавить</button>
 
-      {{ form.non_field_errors }}
-      {{ form.username.errors }}
+<ul class="non-field-errors">
+  {% for error in form.non_field_errors %}
+    <li>{{ error }}</li>
+  {% endfor %}
+</ul>
+
   </form>
 
 </div>
