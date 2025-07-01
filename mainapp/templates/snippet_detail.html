@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load snippets_tags %}
+{% load lang_tags %}
 
 {% block content %}
 <div class="container">
@@ -11,8 +11,9 @@
                         Название:
                         <input type="text" value="{{ snippet.name }}" class="form-control">
 
-                        {{ snippet.lang }}
-                       <i class="fa-brands {{ snippet.icon_class }}"></i>
+                        Язык:
+                    <i class="{% lang_icon_class snippet.lang %}"></i>
+                    <span>{{ snippet.lang }}</span>
 
                     </div>
                     <div class="col col-4">

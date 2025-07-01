@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% load snippets_tags %}
+{% load lang_tags %}
 
 {% block content %}
 <div class="container my-4">
@@ -53,9 +53,8 @@
                         </a>
                     </td>
                     <td>
-                   {{ snippet.lang }}
-                   <i class="fa-brands {{ snippet.icon_class }}"></i>
-
+                    <i class="{% lang_icon_class snippet.lang %}"></i>
+                    <span>{{ snippet.lang }}</span>
                     </td>
 
                     <td>{{ snippet.creation_date|date:"d.m.Y H:i" }}</td>
