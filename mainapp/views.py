@@ -1,4 +1,3 @@
-from django.http import Http404
 from django.shortcuts import render, redirect, get_object_or_404
 from mainapp.models import Snippet
 from mainapp.forms import SnippetForm
@@ -26,7 +25,7 @@ def snippet_detail(request, id):
     }
     return render(request, 'snippet_detail.html', context)
 
-
+#CRUD
 def add_snippet_page(request):
     form = SnippetForm(request.POST or None)
 
@@ -54,7 +53,6 @@ def edit_snippet_page(request, pk):
         form = SnippetForm(instance=snippet)
 
     return render(request, 'edit_snippet.html', {'form': form})
-
 
 def delete_snippet_page(request, pk):
     snippet = get_object_or_404(Snippet, pk=pk)
