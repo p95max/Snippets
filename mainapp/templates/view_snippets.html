@@ -1,83 +1,94 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load snippets_tags %}
+
 {% block content %}
+<div class="container my-4">
 
-<div class="container my-5">
-    <div class="text-center mb-4">
-        <div class="row mt-3">
-
+    <div class="text-center mb-3">
+        <div class="row mt-2">
             <div class="col">
                 <hr>
-                <h4>Найти сниппет по номеру</h4>
+                <h5>Найти сниппет по номеру</h5>
                 <form action='' id="view_snippet_form">
-                    <div class="form-group row">
-                        <label for="snippet_id" class="col-sm-2 col-form-label col-form-label-lg">Номер:</label>
-                        <div class="col-sm-8">
-                            <input type="number" class="form-control form-control-lg" id="snippet_id"
-                                   placeholder="введите число">
+                    <div class="form-row row g-2 align-items-center">
+                        <div class="col-sm-2">
+                            <label for="snippet_id" class="col-form-label">Номер:</label>
+                        </div>
+                        <div class="col-sm-6">
+                            <input type="number" class="form-control" id="snippet_id" placeholder="введите число">
                         </div>
                         <div class="col-sm-2">
-                            <input type="submit" class="form-control form-control-lg btn btn-info" value="Найти">
+                            <input type="submit" class="btn btn-sm btn-info w-100" value="Найти">
                         </div>
                     </div>
                 </form>
-            </div></div><br>
+            </div>
+        </div>
 
-        <h4 class="fw-bold">{{ pagename }}</h4>
+        <h5 class="fw-bold mt-4">{{ pagename }}</h5>
     </div>
 
     <div class="table-responsive">
-        <table class="table table-hover align-middle">
-    <thead class="table-light">
-        <tr>
-            <th class="px-4">ID</th>
-            <th class="px-4">Название</th>
-            <th class="px-4">Дата</th>
-            <th class="text-center px-4">✏️</th>
-            <th class="text-center px-4">🗑️</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for snippet in snippets %}
-        <tr>
-            <td class="px-4">{{ snippet.id }}</td>
-            <td class="px-4">
-                <a href="{% url 'mainapp:snippet-detail' snippet.id %}" class="text-decoration-none">
-                    {{ snippet.name }}
-                </a>
-            </td>
-            <td class="px-4">{{ snippet.creation_date|date:"d.m.Y H:i" }}</td>
-            <td class="text-center px-4">
-                <a href="{% url 'mainapp:snippet-edit' snippet.pk %}" class="btn btn-sm btn-outline-secondary">Ред.</a>
-            </td>
-            <td class="text-center px-4">
-                <form action="{% url 'mainapp:snippet-delete' snippet.pk %}" method="post" style="display:inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Удалить?');">
-                        Удалить
-                    </button>
-                </form>
-            </td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="5" class="text-center text-muted">Сниппеты отсутствуют</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+        <table class="table table-hover table-sm align-middle">
+            <thead class="table-light small">
+                <tr>
+                    <th>ID</th>
+                    <th>Название</th>
+                    <th>Язык</th>
+                    <th>Создан</th>
+                    <th>Обновлён</th>
+                    <th>👁 Просмотры</th>
+                    <th class="text-center">✏️</th>
+                    <th class="text-center">🗑️</th>
+                </tr>
+            </thead>
+            <tbody class="small">
+                {% for snippet in snippets %}
+                <tr>
+                    <td>{{ snippet.id }}</td>
+                    <td>
+                        <a href="{% url 'mainapp:snippet-detail' snippet.id %}" class="text-decoration-none">
+                            {{ snippet.name }}
+                        </a>
+                    </td>
+                    <td>
+                   {{ snippet.lang }}
+                   <i class="fa-brands {{ snippet.icon_class }}"></i>
+
+                    </td>
+
+                    <td>{{ snippet.creation_date|date:"d.m.Y H:i" }}</td>
+                    <td>{{ snippet.updated_date|date:"d.m.Y H:i" }}</td>
+                    <td>{{ snippet.views_count }}</td>
+                    <td class="text-center">
+                        <a href="{% url 'mainapp:snippet-edit' snippet.pk %}" class="btn btn-sm btn-outline-secondary">✎</a>
+                    </td>
+                    <td class="text-center">
+                        <form action="{% url 'mainapp:snippet-delete' snippet.pk %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Удалить?');">✘</button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-center text-muted">Сниппеты отсутствуют</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 
-    <div class="text-end mt-3">
-        <small class="text-muted">Всего сниппетов: {{ count_snippets }}</small>
+    <div class="text-end mt-2 small">
+        <span class="text-muted">Всего сниппетов: {{ count_snippets }}</span>
     </div>
-
 
     <div class="row mt-3">
-            <div class="col-4 offset-4">
-                <a href="{% url 'mainapp:snippet-add' %}" class="form-control form-control-lg btn btn-info">Добавить новый сниппет</a>
-            </div>
+        <div class="col-6 offset-3">
+            <a href="{% url 'mainapp:snippet-add' %}" class="btn btn-info w-100 btn-sm">➕ Добавить сниппет</a>
         </div>
+    </div>
 
 </div>
 {% endblock %}

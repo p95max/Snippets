@@ -16,11 +16,11 @@ class SnippetForm(forms.ModelForm):
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите название'}),
             'lang': forms.Select(attrs={'class': 'form-control'}, choices=LANG_CHOICES),
             'code': forms.Textarea(attrs={'class': 'form-control', 'rows': 10, 'placeholder': 'Введите код'}),
-            'description': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Описание сниппета(опционально)'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Описание (опционально)'}),
         }
 
     def clean_name(self):
         name = self.cleaned_data['name']
-        if len(name) < 5:
+        if len(name) < 3:
             raise forms.ValidationError('Имя слишком короткое(должно быть минимум 3 символа)')
         return name

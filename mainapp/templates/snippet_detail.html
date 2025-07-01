@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load snippets_tags %}
 
 {% block content %}
 <div class="container">
@@ -7,10 +8,15 @@
             <fieldset disabled>
                 <div class="row disabled">
                     <div class="col col-8">
-                        Название: <input type="text" value="{{ snippet.name }}" class="form-control">
+                        Название:
+                        <input type="text" value="{{ snippet.name }}" class="form-control">
+
+                        {{ snippet.lang }}
+                       <i class="fa-brands {{ snippet.icon_class }}"></i>
+
                     </div>
                     <div class="col col-4">
-                        Дата создания: <input type="text" value="{{ snippet.creation_date }}" class="form-control">
+                        Дата создания: <input type="text" value="{{ snippet.creation_date|date:"d.m.Y H:i" }}" class="form-control">
                     </div>
                 </div>
                 <hr>
@@ -19,6 +25,7 @@
                         <div class="p-2 h-100" style="border:1px solid #ced4da; border-radius:5px; background-color: #1e1e1e; color: #f8f8f2; font-family: monospace; white-space: pre-wrap;">
                             <pre style="margin: 0; text-align: left">{{ snippet.code }}</pre>
                         </div>
+                        <p style="text-align: left">👁Просмотры: {{ snippet.views_count }}</p>
                     </div>
                 </div>
             </fieldset>

@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from mainapp.models import Snippet
+from mainapp.models import Snippet, LANG_ICONS
 from mainapp.forms import SnippetForm
 
 
@@ -9,6 +9,10 @@ def index_page(request):
 
 def snippets_page(request):
     snippets = Snippet.objects.all().order_by('-creation_date')
+
+    for snippet in snippets:
+        snippet.icon_class = get_icon_class(snippet.lang)
+
     count_snippets = snippets.count()
     context = {
         'pagename': 'Просмотр сниппетов',
@@ -19,11 +23,21 @@ def snippets_page(request):
 
 def snippet_detail(request, id):
     snippet = get_object_or_404(Snippet, id=id)
+    viewed_key = f'snippet_{id}'
+
+    if not request.session.get(viewed_key, False):
+        snippet.views_count += 1
+        snippet.save(update_fields=['views_count'])
+        request.session[viewed_key] = True
+
     context = {
         'pagename': f'Сниппет: {snippet.name}',
         'snippet': snippet
     }
     return render(request, 'snippet_detail.html', context)
+
+def get_icon_class(lang):
+    return LANG_ICONS.get(lang)
 
 #CRUD
 def add_snippet_page(request):
@@ -61,6 +75,8 @@ def delete_snippet_page(request, pk):
         snippet.delete()
         return redirect('mainapp:snippets-list')
     return redirect('mainapp:snippets-list')
+
+
 
 
 
