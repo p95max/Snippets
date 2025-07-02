@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from mainapp.models import Snippet, LANG_ICONS
 from mainapp.forms import SnippetForm
+from django.contrib import auth
 
 
 def index_page(request):
@@ -38,6 +39,27 @@ def snippet_detail(request, id):
 
 def get_icon_class(lang):
     return LANG_ICONS.get(lang)
+
+def custom_login(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        user = auth.authenticate(request, username=username, password=password)
+        if user is not None:
+            auth.login(request, user)
+            return redirect('mainapp:home')
+        else:
+            context = {
+                'errors': ['Неверные логин или пароль'],
+                'username': username,
+            }
+            return render(request, 'index.html', context)
+
+def custom_logout(request):
+    auth.logout(request)
+    return redirect('mainapp:home')
+
 
 #CRUD
 def add_snippet_page(request):

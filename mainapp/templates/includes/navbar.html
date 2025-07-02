@@ -1,0 +1,28 @@
+<header class="navbar-custom">
+    <nav>
+        <div class="menu">
+            <a href="{% url 'mainapp:home' %}">Главная</a>
+            <a href="{% url 'mainapp:snippets-list' %}">Сниппеты</a><br>
+
+            {% if request.user.is_authenticated %}
+                <span>Welcome, {{ request.user.username }}</span>
+                <a href="{% url 'mainapp:custom_logout' %}">Выйти</a>
+            {% else %}
+                <form action="{% url 'mainapp:custom_login' %}" method="post" class="login-form">
+                    {% csrf_token %}
+                    <input type="text" name="username" value="{{ username }}" placeholder="Введите имя пользователя" required>
+                    <input type="password" name="password" placeholder="Введите пароль" required>
+                    {% if errors %}
+                        <ul>
+                        {% for error in errors %}
+                        <li style="color: red">{{ error }}</li>
+                        {% endfor %}
+                        </ul>
+                    {% endif %}
+                    <input type="submit" value="Login">
+                </form>
+            {% endif %}
+
+        </div>
+    </nav>
+</header>
