@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.db import models
 
 LANG_CHOICES = [
@@ -24,6 +25,8 @@ class Snippet(models.Model):
     updated_date = models.DateTimeField(auto_now=True)
     description = models.TextField(blank=True, null=True)
     views_count = models.PositiveIntegerField(default=0)
+    user = models.ForeignKey(to=User, on_delete=models.CASCADE)
+    is_public = models.BooleanField(default=False, verbose_name='Публичный сниппет')
 
     def __str__(self):
         return self.name

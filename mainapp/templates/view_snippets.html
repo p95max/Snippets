@@ -1,31 +1,12 @@
 {% extends 'base.html' %}
-{% load static %}
 {% load lang_tags %}
+
+{% block title %}Просмотр сниппетов{% endblock %}
 
 {% block content %}
 <div class="container my-4">
 
     <div class="text-center mb-3">
-        <div class="row mt-2">
-            <div class="col">
-                <hr>
-                <h5>Найти сниппет по номеру</h5>
-                <form action='' id="view_snippet_form">
-                    <div class="form-row row g-2 align-items-center">
-                        <div class="col-sm-2">
-                            <label for="snippet_id" class="col-form-label">Номер:</label>
-                        </div>
-                        <div class="col-sm-6">
-                            <input type="number" class="form-control" id="snippet_id" placeholder="введите число">
-                        </div>
-                        <div class="col-sm-2">
-                            <input type="submit" class="btn btn-sm btn-info w-100" value="Найти">
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-
         <h5 class="fw-bold mt-4">{{ pagename }}</h5>
     </div>
 
@@ -33,46 +14,36 @@
         <table class="table table-hover table-sm align-middle">
             <thead class="table-light small">
                 <tr>
-                    <th>ID</th>
+                    <th>#</th>  <!-- Нумерация -->
                     <th>Название</th>
                     <th>Язык</th>
                     <th>Создан</th>
                     <th>Обновлён</th>
+                    <th>Автор</th>
                     <th>👁 Просмотры</th>
-                    <th class="text-center">✏️</th>
-                    <th class="text-center">🗑️</th>
                 </tr>
             </thead>
             <tbody class="small">
                 {% for snippet in snippets %}
                 <tr>
-                    <td>{{ snippet.id }}</td>
+                    <td>{{ forloop.counter }}</td>  <!-- нумерация -->
                     <td>
                         <a href="{% url 'mainapp:snippet-detail' snippet.id %}" class="text-decoration-none">
                             {{ snippet.name }}
                         </a>
                     </td>
                     <td>
-                    <i class="{% lang_icon_class snippet.lang %}"></i>
-                    <span>{{ snippet.lang }}</span>
+                        <i class="{% lang_icon_class snippet.lang %}"></i>
+                        <span>{{ snippet.lang }}</span>
                     </td>
-
                     <td>{{ snippet.creation_date|date:"d.m.Y H:i" }}</td>
                     <td>{{ snippet.updated_date|date:"d.m.Y H:i" }}</td>
+                    <td>{{ snippet.user|default:"Нет автора" }}</td>
                     <td>{{ snippet.views_count }}</td>
-                    <td class="text-center">
-                        <a href="{% url 'mainapp:snippet-edit' snippet.pk %}" class="btn btn-sm btn-outline-secondary">✎</a>
-                    </td>
-                    <td class="text-center">
-                        <form action="{% url 'mainapp:snippet-delete' snippet.pk %}" method="post" style="display:inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Удалить?');">✘</button>
-                        </form>
-                    </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="8" class="text-center text-muted">Сниппеты отсутствуют</td>
+                    <td colspan="9" class="text-center text-muted">Сниппеты отсутствуют</td>
                 </tr>
                 {% endfor %}
             </tbody>
