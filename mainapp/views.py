@@ -11,7 +11,6 @@ from django.contrib.auth.forms import UserCreationForm
 def index_page(request):
     context = {'pagename': 'PythonBin'}
     return render(request, 'index.html', context)
-
 def snippets_page(request):
     if request.user.is_authenticated:
         snippets = Snippet.objects.filter(
@@ -28,7 +27,6 @@ def snippets_page(request):
         'snippets': snippets,
         'count_snippets': snippets.count(),
     })
-
 def snippet_detail(request, id):
     snippet = get_object_or_404(Snippet, id=id)
     viewed_key = f'snippet_{id}'
@@ -48,10 +46,6 @@ def user_snippet_list(request):
     snippets = Snippet.objects.filter(user=request.user).order_by('-creation_date')
     return render(request, 'user_snippets.html', {'snippets': snippets})
 
-def get_icon_class(lang):
-    return LANG_ICONS.get(lang)
-
-
 # Custom auth
 def custom_login(request):
     if request.method == 'POST':
@@ -69,7 +63,6 @@ def custom_login(request):
             }
             return render(request, 'index.html', context)
     return redirect('mainapp:home')
-
 
 def custom_logout(request):
     auth.logout(request)
@@ -135,6 +128,10 @@ def delete_snippet_page(request, pk):
         return redirect('mainapp:user_snippets')
 
     return redirect('mainapp:user_snippets')
+
+# UI
+def get_icon_class(lang):
+    return LANG_ICONS.get(lang)
 
 
 
