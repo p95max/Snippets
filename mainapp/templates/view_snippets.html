@@ -19,6 +19,7 @@
                     <th>Язык</th>
                     <th>Создан</th>
                     <th>Обновлён</th>
+                     <th>Публичный?</th>
                     <th>Автор</th>
                     <th>👁 Просмотры</th>
                 </tr>
@@ -38,6 +39,13 @@
                     </td>
                     <td>{{ snippet.creation_date|date:"d.m.Y H:i" }}</td>
                     <td>{{ snippet.updated_date|date:"d.m.Y H:i" }}</td>
+                    <td>
+            {% if snippet.is_public %}
+                ✅
+            {% else %}
+                🔒
+            {% endif %}
+        </td>
                     <td>{{ snippet.user|default:"Нет автора" }}</td>
                     <td>{{ snippet.views_count }}</td>
                 </tr>
