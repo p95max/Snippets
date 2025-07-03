@@ -21,6 +21,7 @@
                     <th>Обновлён</th>
                      <th>Публичный?</th>
                     <th>Автор</th>
+                    <th>Комментарии</th>
                     <th>👁 Просмотры</th>
                 </tr>
             </thead>
@@ -47,6 +48,7 @@
             {% endif %}
         </td>
                     <td>{{ snippet.user|default:"Нет автора" }}</td>
+                <td>{{ snippet.num_comments|default:"-" }}</td>
                     <td>{{ snippet.views_count }}</td>
                 </tr>
                 {% empty %}

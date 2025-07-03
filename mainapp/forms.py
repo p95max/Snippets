@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from mainapp.models import Snippet, LANG_CHOICES
+from mainapp.models import Snippet, LANG_CHOICES, Comment
 
 
 class SnippetForm(forms.ModelForm):
@@ -56,3 +56,18 @@ class UserRegistrationForm(UserCreationForm):
         if not pass1 or not pass2 or pass1 != pass2:
             raise forms.ValidationError('Пароли не совпадают либо пустые')
         return pass2
+
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['text']
+        widgets = {
+            'text': forms.Textarea(attrs={
+                'placeholder': 'Ваш комментарий',
+                'class': 'form-control',
+                'rows': 3,
+            }),
+        }
+        labels = {
+            'text': '',
+        }

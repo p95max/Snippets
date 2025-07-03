@@ -12,9 +12,8 @@
                         <input type="text" value="{{ snippet.name }}" class="form-control">
 
                         Язык:
-                    <i class="{% lang_icon_class snippet.lang %}"></i>
-                    <span>{{ snippet.lang }}</span>
-
+                        <i class="{% lang_icon_class snippet.lang %}"></i>
+                        <span>{{ snippet.lang }}</span>
                     </div>
                     <div class="col col-4">
                         Дата создания: <input type="text" value="{{ snippet.creation_date|date:"d.m.Y H:i" }}" class="form-control">
@@ -32,5 +31,44 @@
             </fieldset>
         </div>
     </div>
+
+    <!-- Комментарии -->
+    <div class="row mt-4">
+        <div class="col">
+            <h5>Все комментарии ({{ snippet.comment_set.count }})</h5>
+
+            {% for comment in snippet.comment_set.all %}
+                <div class="border rounded p-2 mb-2">
+                    <strong>{{ comment.author.username }}</strong> <small class="text-muted">{{ comment.creation_date|date:"d.m.Y H:i" }}</small>
+                    <p>{{ comment.text|linebreaksbr }}</p>
+                </div>
+            {% empty %}
+                <p>Комментариев пока нет.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Форма добавления комментария -->
+   {% if user.is_authenticated %}
+<div class="row mt-3">
+    <div class="col">
+        <h5>Добавить новый комментарий</h5>
+<form action="{% url 'mainapp:comment_add' %}" method="POST">
+    {% csrf_token %}
+    {{ comment_form.text }}
+    <input type="hidden" name="snippet_id" value="{{ snippet.id }}">
+    <button type="submit" class="btn btn-primary mt-2">Добавить</button>
+</form>
+
+    </div>
+</div>
+{% else %}
+<div class="row mt-3">
+    <div class="col">
+        <p><a href="{% url 'mainapp:custom_login' %}">Войдите</a>, чтобы оставить комментарий.</p>
+    </div>
+</div>
+{% endif %}
+
 </div>
 {% endblock %}

@@ -1,23 +1,25 @@
 from django.contrib.auth.decorators import login_required
 from django.db import models
-from django.http import HttpResponseForbidden
+from django.db.models import Count, Q
+from django.http import HttpResponseForbidden, HttpResponseNotAllowed
 from django.shortcuts import render, redirect, get_object_or_404
 from mainapp.models import Snippet, LANG_ICONS
-from mainapp.forms import SnippetForm, UserRegistrationForm
+from mainapp.forms import SnippetForm, UserRegistrationForm, CommentForm
 from django.contrib import auth
-from django.contrib.auth.forms import UserCreationForm
-
 
 def index_page(request):
     context = {'pagename': 'PythonBin'}
     return render(request, 'index.html', context)
+
 def snippets_page(request):
     if request.user.is_authenticated:
-        snippets = Snippet.objects.filter(
-            models.Q(is_public=True) | models.Q(user=request.user)
-        ).order_by('-creation_date')
+        snippets = Snippet.objects.filter(Q(is_public=True) | Q(user=request.user)
+        ).annotate(num_comments=Count('comment')) \
+         .order_by('-creation_date')
     else:
-        snippets = Snippet.objects.filter(is_public=True).order_by('-creation_date')
+        snippets = Snippet.objects.filter(is_public=True) \
+            .annotate(num_comments=Count('comment')) \
+            .order_by('-creation_date')
 
     for snippet in snippets:
         snippet.icon_class = get_icon_class(snippet.lang)
@@ -27,9 +29,12 @@ def snippets_page(request):
         'snippets': snippets,
         'count_snippets': snippets.count(),
     })
+
 def snippet_detail(request, id):
-    snippet = get_object_or_404(Snippet, id=id)
+    snippet = Snippet.objects.annotate(num_comments=Count('comment')).get(id=id)
     viewed_key = f'snippet_{id}'
+    comment_form = CommentForm()
+
 
     if not request.session.get(viewed_key, False):
         snippet.views_count += 1
@@ -38,12 +43,16 @@ def snippet_detail(request, id):
 
     context = {
         'pagename': f'Сниппет: {snippet.name}',
-        'snippet': snippet
+        'snippet': snippet,
+        'comment_form': comment_form,
     }
     return render(request, 'snippet_detail.html', context)
+
 @login_required
 def user_snippet_list(request):
-    snippets = Snippet.objects.filter(user=request.user).order_by('-creation_date')
+    snippets = Snippet.objects.filter(user=request.user) \
+        .annotate(num_comments=Count('comment')) \
+        .order_by('-creation_date')
     return render(request, 'user_snippets.html', {'snippets': snippets})
 
 # Custom auth
@@ -78,7 +87,6 @@ def custom_registration(request):
         form = UserRegistrationForm()
 
     return render(request, 'custom_auth/register.html', {'form': form})
-
 
 #CRUD
 @login_required
@@ -128,6 +136,30 @@ def delete_snippet_page(request, pk):
         return redirect('mainapp:user_snippets')
 
     return redirect('mainapp:user_snippets')
+
+# Comments
+@login_required
+def comment_add(request):
+    if request.method == "POST":
+        if not request.user.is_authenticated:
+            return redirect('mainapp:custom_login')
+
+        comment_form = CommentForm(request.POST)
+        snippet_id = request.POST.get('snippet_id')
+        snippet = get_object_or_404(Snippet, id=snippet_id)
+
+        if comment_form.is_valid():
+            comment = comment_form.save(commit=False)
+            comment.author = request.user
+            comment.snippet = snippet
+            comment.save()
+            return redirect('mainapp:snippet-detail', id=snippet_id)
+
+        return redirect('mainapp:snippet-detail', id=snippet_id)
+
+    return HttpResponseNotAllowed(['POST'])
+
+
 
 # UI
 def get_icon_class(lang):

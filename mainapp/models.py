@@ -8,7 +8,6 @@ LANG_CHOICES = [
     ('java', 'Java'),
     ('js', 'JavaScript'),
 ]
-
 LANG_ICONS = {
     'python': 'fa-python',
     'cpp': 'fa-c++',
@@ -30,3 +29,14 @@ class Snippet(models.Model):
 
     def __str__(self):
         return self.name
+
+class Comment(models.Model):
+    text = models.TextField()
+    creation_date = models.DateTimeField(auto_now_add=True)
+    updated_date = models.DateTimeField(auto_now=True)
+    author = models.ForeignKey(to=User, on_delete=models.CASCADE)
+    snippet = models.ForeignKey(to=Snippet, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.text} - {self.author.username}"
+

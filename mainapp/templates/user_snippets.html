@@ -19,6 +19,7 @@
         <th>Создан</th>
         <th>Обновлён</th>
         <th>Публичный?</th>
+         <th>Комментарии</th>
         <th>👁 Просмотры</th>
         <th class="text-center">✏️</th>
         <th class="text-center">🗑️</th>
@@ -46,6 +47,7 @@
                 🔒
             {% endif %}
         </td>
+    <td>{{ snippet.num_comments|default:"-" }}</td>
         <td>{{ snippet.views_count }}</td>
         <td class="text-center">
             <a href="{% url 'mainapp:snippet-edit' snippet.pk %}" class="btn btn-sm btn-outline-secondary">✎</a>
