@@ -5,6 +5,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from mainapp.models import Snippet, LANG_ICONS
 from mainapp.forms import SnippetForm, UserRegistrationForm
 from django.contrib import auth
+from django.contrib.auth.forms import UserCreationForm
 
 
 def index_page(request):
@@ -67,12 +68,14 @@ def custom_login(request):
                 'username': username,
             }
             return render(request, 'index.html', context)
+    return redirect('mainapp:home')
+
 
 def custom_logout(request):
     auth.logout(request)
     return redirect('mainapp:home')
 
-def custom_registation(request):
+def custom_registration(request):
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
         if form.is_valid():

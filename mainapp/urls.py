@@ -1,6 +1,7 @@
 from django.urls import path
 from mainapp.views import (index_page, add_snippet_page, snippets_page, snippet_detail,
-                           edit_snippet_page, delete_snippet_page, custom_login, custom_logout, user_snippet_list)
+                           edit_snippet_page, delete_snippet_page, custom_login, custom_logout, user_snippet_list,
+                           custom_registration)
 
 app_name = 'mainapp'
 
@@ -13,6 +14,7 @@ urlpatterns = [
     # Custom auth
     path('custom_login/', custom_login, name='custom_login'),
     path('logout/', custom_logout, name='custom_logout'),
+    path('regist/', custom_registration, name='custom_regist'),
 
     #CRUD
     path('snippets/add', add_snippet_page, name="snippet-add"),
