@@ -1,5 +1,8 @@
-<header class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
-  <a class="navbar-brand" href="{% url 'mainapp:home' %}">Snippets</a>
+<header class="navbar navbar-expand-lg navbar-dark" style="background-color:#24292e; padding: 0.5rem 1rem;">
+  <a class="navbar-brand" href="{% url 'mainapp:home' %}">
+  <span style="color: #40E0D0; font-weight: bold;">×</span> PythonBin
+</a>
+
   <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
     <span class="navbar-toggler-icon"></span>
   </button>
@@ -17,25 +20,24 @@
     </ul>
 
     {% if request.user.is_authenticated %}
-      <span class="navbar-text text-white me-3">
-        Добро пожаловать, {{ request.user.username }}
+      <span class="navbar-text me-3" style="color:#c9d1d9;">
+        Добро пожаловать, <span style="color:#56d364;">{{ request.user.username }}</span>
       </span>
       <a class="btn btn-outline-light" href="{% url 'mainapp:custom_logout' %}">Выйти</a>
     {% else %}
-      <form class="d-flex align-items-center" action="{% url 'mainapp:custom_login' %}" method="post" novalidate>
+      <form class="d-flex align-items-center" action="{% url 'mainapp:custom_login' %}" method="post" style="gap:0.5rem;">
         {% csrf_token %}
-        <input class="form-control me-2" type="text" name="username" placeholder="Имя пользователя" value="{{ username }}" required>
-        <input class="form-control me-2" type="password" name="password" placeholder="Пароль" required>
-        <button class="btn btn-outline-success me-2" type="submit">Войти</button>
-        <a class="btn btn-outline-info me-2" href="{% url 'mainapp:custom_regist' %}">Регистрация</a>
+        <input class="form-control form-control-sm" type="text" name="username" placeholder="Имя пользователя" required style="width: 150px;">
+        <input class="form-control form-control-sm" type="password" name="password" placeholder="Пароль" required style="width: 150px;">
+        <button class="btn btn-sm btn-outline-success" type="submit">Войти</button>
+        <a class="btn btn-sm btn-outline-info" href="{% url 'mainapp:custom_regist' %}">Регистрация</a>
       </form>
-
       {% if errors %}
-        <div class="alert alert-danger mt-2 mb-0 p-2 small" role="alert">
+        <ul class="text-danger small mt-2 mb-0">
           {% for error in errors %}
-            <div>{{ error }}</div>
+            <li>{{ error }}</li>
           {% endfor %}
-        </div>
+        </ul>
       {% endif %}
     {% endif %}
   </div>

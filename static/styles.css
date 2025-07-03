@@ -1,39 +1,54 @@
 body {
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: #f0f2f5; /* светло-серый, приятный для глаз */
+  color: #333; /* чуть темнее для хорошего контраста */
+  margin: 0;
+  min-height: 100vh;
 }
+
 .navbar-custom {
-    background-color: #ffffff;
-    border-bottom: 1px solid #e5e5e5;
-    padding: 1rem 2rem;
-    text-align: center;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e5e5;
+  padding: 1rem 2rem;
+  text-align: center;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.05);
 }
+
 .navbar-custom a {
-    color: #212529;
-    text-decoration: none;
-    margin: 0 1rem;
-    font-weight: 500;
-    transition: color 0.2s ease;
-    display: inline-block;
+  color: #212529;
+  text-decoration: none;
+  margin: 0 1rem;
+  font-weight: 500;
+  transition: color 0.2s ease;
+  display: inline-block;
 }
+
 .navbar-custom a:hover {
-    color: #0d6efd;
+  color: #0d6efd;
 }
+
 main.container {
-    padding-top: 40px;
-    padding-bottom: 60px;
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center; /* Центрируем контент */
+  padding-top: 40px;
+  padding-bottom: 60px;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center; /* Центрируем контент */
 }
+
 footer {
-    padding: 20px 0;
-    color: #6c757d;
-    text-align: center;
-    font-size: 0.9rem;
-    border-top: 1px solid #e5e5e5;
+  padding: 20px 0;
+  color: #6c757d;
+  text-align: center;
+  font-size: 0.9rem;
+  border-top: 1px solid #e5e5e5;
 }
+
 .btn-primary {
-    border-radius: 6px;
+  border-radius: 6px;
+}
+
+.text-turquoise {
+  color: #40E0D0 !important;
 }
 
