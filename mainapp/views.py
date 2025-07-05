@@ -5,7 +5,7 @@ from django.db.models import Count, Q
 from django.http import HttpResponseForbidden, HttpResponseNotAllowed
 from django.shortcuts import render, redirect, get_object_or_404
 from mainapp.models import Snippet, LANG_ICONS
-from mainapp.forms import SnippetForm, UserRegistrationForm, CommentForm
+from mainapp.forms import SnippetForm, UserRegistrationForm, CommentForm, SnippetSearchForm
 from django.contrib import auth
 
 def index_page(request):
@@ -176,6 +176,32 @@ def comment_add(request):
         return redirect('mainapp:snippet-detail', id=snippet_id)
 
     return HttpResponseNotAllowed(['POST'])
+
+def search_snippets(request):
+    form = SnippetSearchForm(request.GET)
+    query = ''
+    snippets = Snippet.objects.none()
+
+    if form.is_valid():
+        query = form.cleaned_data['query']
+        if query:
+            snippets = Snippet.objects.filter(
+                Q(is_public=True),
+                Q(name__icontains=query) | Q(code__icontains=query) | Q(lang__icontains=query)
+            ).annotate(num_comments=Count('comment')).order_by('-creation_date')
+
+    paginator = Paginator(snippets, 5)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'query': query,
+        'page_obj': page_obj,
+        'count_snippets': snippets.count(),
+        'pagename': 'Результаты поиска',
+    }
+
+    return render(request, 'search_results.html', context=context)
 
 
 

@@ -29,6 +29,7 @@ class SnippetForm(forms.ModelForm):
             raise forms.ValidationError('Имя слишком короткое (должно быть минимум 3 символа)')
         return name
 
+
 class UserRegistrationForm(UserCreationForm):
     email = forms.EmailField(label='Ваш Email')
 
@@ -57,6 +58,7 @@ class UserRegistrationForm(UserCreationForm):
             raise forms.ValidationError('Пароли не совпадают либо пустые')
         return pass2
 
+
 class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
@@ -71,3 +73,11 @@ class CommentForm(forms.ModelForm):
         labels = {
             'text': '',
         }
+
+
+class SnippetSearchForm(forms.Form):
+    query = forms.CharField(
+        label='Поиск',
+        required=False,
+        widget=forms.TextInput(attrs={'placeholder': 'Поиск по названию, коду или языку...'})
+    )

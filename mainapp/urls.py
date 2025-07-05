@@ -1,7 +1,7 @@
 from django.urls import path
 from mainapp.views import (index_page, add_snippet_page, snippets_page, snippet_detail,
                            edit_snippet_page, delete_snippet_page, custom_login, custom_logout, user_snippet_list,
-                           custom_registration, comment_add)
+                           custom_registration, comment_add, search_snippets)
 
 app_name = 'mainapp'
 
@@ -10,6 +10,7 @@ urlpatterns = [
     path('snippets/list', snippets_page, name="snippets-list"),
     path('snippet/<int:id>', snippet_detail, name="snippet-detail"),
     path('user_snippets/', user_snippet_list, name="user_snippets"),
+    path('search/', search_snippets, name='snippets-search'),
 
     # Custom auth
     path('custom_login/', custom_login, name='custom_login'),

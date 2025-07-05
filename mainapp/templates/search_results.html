@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="container mt-4">
+    <h2>Результаты поиска</h2>
+    {% if query %}
+      <div class="alert alert-info mb-3">
+        По запросу <strong>{{ query }}</strong> найдено {{ count_snippets }} сниппетов.
+      </div>
+    {% endif %}
+
+    {% if page_obj.object_list %}
+      {% for snippet in page_obj %}
+        <div class="card mb-3">
+          <div class="card-body">
+            <h5 class="card-title">{{ snippet.name }}</h5>
+            <p class="card-text"><pre>{{ snippet.code|truncatechars:200 }}</pre></p>
+            <span class="badge bg-secondary">{{ snippet.lang }}</span>
+            <a href="{% url 'mainapp:snippet-detail' snippet.id %}" class="btn btn-sm btn-outline-primary float-end">Подробнее</a>
+          </div>
+        </div>
+      {% endfor %}
+
+{% include 'includes/paginator.html' %}
+
+    {% else %}
+      <div class="alert alert-warning">Ничего не найдено.</div>
+    {% endif %}
+  </div>
+{% endblock %}
