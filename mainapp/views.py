@@ -31,7 +31,6 @@ def snippets_page(request):
     page_obj = paginator.get_page(page_number)
 
     return render(request, 'view_snippets.html', {
-        'pagename': 'Просмотр сниппетов',
         'snippets': snippets,
         'count_snippets': snippets.count(),
         'page_obj': page_obj,

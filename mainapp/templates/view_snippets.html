@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 {% load lang_tags %}
 
-{% block title %}Просмотр сниппетов{% endblock %}
+{% block title %}Просмотр общих сниппетов{% endblock %}
 
 {% block content %}
 <div class="container my-4">
 
     <div class="text-center mb-3">
-        <h5 class="fw-bold mt-4">{{ pagename }}</h5>
+        <h5 class="fw-bold mt-4">Общие/Публичные сниппеты</h5>
     </div>
 
     <div class="table-responsive">
@@ -61,14 +61,16 @@
     </div>
 
     <div class="text-end mt-2 small">
-        <span class="text-muted">Всего сниппетов: {{ count_snippets }}</span>
+        <span class="text-muted">Всего общих сниппетов: {{ count_snippets }}</span>
     </div>
 
+{% if request.user.is_authenticated %}
     <div class="row mt-3">
         <div class="col-6 offset-3">
             <a href="{% url 'mainapp:snippet-add' %}" class="btn btn-info w-100 btn-sm">➕ Добавить сниппет</a>
         </div>
     </div>
+{% endif %}
 
 {% include 'includes/paginator.html' %}
 
