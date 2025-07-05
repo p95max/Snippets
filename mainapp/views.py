@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.db import models
 from django.db.models import Count, Q
 from django.http import HttpResponseForbidden, HttpResponseNotAllowed
@@ -24,10 +25,16 @@ def snippets_page(request):
     for snippet in snippets:
         snippet.icon_class = get_icon_class(snippet.lang)
 
+    paginator = Paginator(snippets, 5)
+
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     return render(request, 'view_snippets.html', {
         'pagename': 'Просмотр сниппетов',
         'snippets': snippets,
         'count_snippets': snippets.count(),
+        'page_obj': page_obj,
     })
 
 def snippet_detail(request, id):
@@ -53,7 +60,18 @@ def user_snippet_list(request):
     snippets = Snippet.objects.filter(user=request.user) \
         .annotate(num_comments=Count('comment')) \
         .order_by('-creation_date')
-    return render(request, 'user_snippets.html', {'snippets': snippets})
+
+    paginator = Paginator(snippets, 5)
+
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'snippets': snippets,
+        'page_obj': page_obj,
+    }
+
+    return render(request, 'user_snippets.html', context=context)
 
 # Custom auth
 def custom_login(request):

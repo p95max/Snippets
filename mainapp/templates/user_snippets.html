@@ -26,7 +26,7 @@
     </tr>
 </thead>
 <tbody class="small">
-    {% for snippet in snippets %}
+    {% for snippet in page_obj %}
     <tr>
         <td>{{ forloop.counter }}</td>
         <td>
@@ -78,5 +78,8 @@
             <a href="{% url 'mainapp:snippet-add' %}" class="btn btn-info w-100 btn-sm">➕ Добавить сниппет</a>
         </div>
     </div>
+
+{% include 'includes/paginator.html' %}
+
 </div>
 {% endblock %}

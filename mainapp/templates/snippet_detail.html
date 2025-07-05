@@ -32,7 +32,6 @@
         </div>
     </div>
 
-    <!-- Комментарии -->
     <div class="row mt-4">
         <div class="col">
             <h5>Все комментарии ({{ snippet.comment_set.count }})</h5>
@@ -48,7 +47,6 @@
         </div>
     </div>
 
-    <!-- Форма добавления комментария -->
    {% if user.is_authenticated %}
 <div class="row mt-3">
     <div class="col">
@@ -58,7 +56,7 @@
     {{ comment_form.text }}
     <input type="hidden" name="snippet_id" value="{{ snippet.id }}">
     <button type="submit" class="btn btn-primary mt-2">Добавить</button>
-</form>
+</form><br>
 
     </div>
 </div>
@@ -69,6 +67,6 @@
     </div>
 </div>
 {% endif %}
-
+<a href="{% url 'mainapp:snippets-list' %}"><-- Назад к списку</a>
 </div>
 {% endblock %}
