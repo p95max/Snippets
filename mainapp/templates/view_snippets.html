@@ -14,7 +14,7 @@
         <table class="table table-hover table-sm align-middle">
             <thead class="table-light small">
                 <tr>
-                    <th>#</th>  <!-- Нумерация -->
+                    <th>#</th>
                     <th>Название</th>
                     <th>Язык</th>
                     <th>Создан</th>
@@ -28,7 +28,7 @@
             <tbody class="small">
                 {% for snippet in page_obj %}
                 <tr>
-                    <td>{{ forloop.counter }}</td>  <!-- нумерация -->
+                    <td>{{ forloop.counter }}</td>
                     <td>
                         <a href="{% url 'mainapp:snippet-detail' snippet.id %}" class="text-decoration-none">
                             {{ snippet.name }}
