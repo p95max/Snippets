@@ -12,18 +12,67 @@
     <div class="table-responsive">
         <table class="table table-hover table-sm align-middle">
             <thead class="table-light small">
-    <tr>
-        <th>#</th>
-        <th>Название</th>
-        <th>Язык</th>
-        <th>Создан</th>
-        <th>Обновлён</th>
-        <th>Публичный?</th>
-         <th>Комментарии</th>
-        <th>👁 Просмотры</th>
-        <th class="text-center">✏️</th>
-        <th class="text-center">🗑️</th>
-    </tr>
+<tr>
+    <th>#</th>
+    <th>
+        <a href="?sort=name&order={% if sort == 'name' and order == 'asc' %}desc{% else %}asc{% endif %}">
+            Название
+            {% if sort == 'name' %}
+                {% if order == 'asc' %}▲{% else %}▼{% endif %}
+            {% endif %}
+        </a>
+    </th>
+    <th>
+        <a href="?sort=lang&order={% if sort == 'lang' and order == 'asc' %}desc{% else %}asc{% endif %}">
+            Язык
+            {% if sort == 'lang' %}
+                {% if order == 'asc' %}▲{% else %}▼{% endif %}
+            {% endif %}
+        </a>
+    </th>
+    <th>
+        <a href="?sort=creation_date&order={% if sort == 'creation_date' and order == 'asc' %}desc{% else %}asc{% endif %}">
+            Создан
+            {% if sort == 'creation_date' %}
+                {% if order == 'asc' %}▲{% else %}▼{% endif %}
+            {% endif %}
+        </a>
+    </th>
+    <th>
+        <a href="?sort=updated_date&order={% if sort == 'updated_date' and order == 'asc' %}desc{% else %}asc{% endif %}">
+            Обновлён
+            {% if sort == 'updated_date' %}
+                {% if order == 'asc' %}▲{% else %}▼{% endif %}
+            {% endif %}
+        </a>
+    </th>
+    <th>
+        <a href="?sort=is_public&order={% if sort == 'is_public' and order == 'asc' %}desc{% else %}asc{% endif %}">
+            Публичный?
+            {% if sort == 'is_public' %}
+                {% if order == 'asc' %}▲{% else %}▼{% endif %}
+            {% endif %}
+        </a>
+    </th>
+    <th>
+        <a href="?sort=num_comments&order={% if sort == 'num_comments' and order == 'asc' %}desc{% else %}asc{% endif %}">
+            Комментарии
+            {% if sort == 'num_comments' %}
+                {% if order == 'asc' %}▲{% else %}▼{% endif %}
+            {% endif %}
+        </a>
+    </th>
+    <th>
+        <a href="?sort=views_count&order={% if sort == 'views_count' and order == 'asc' %}desc{% else %}asc{% endif %}">
+            👁 Просмотры
+            {% if sort == 'views_count' %}
+                {% if order == 'asc' %}▲{% else %}▼{% endif %}
+            {% endif %}
+        </a>
+    </th>
+    <th class="text-center">✏️</th>
+    <th class="text-center">🗑️</th>
+</tr>
 </thead>
 <tbody class="small">
     {% for snippet in page_obj %}

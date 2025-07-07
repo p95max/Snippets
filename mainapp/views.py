@@ -56,18 +56,38 @@ def snippet_detail(request, id):
 
 @login_required
 def user_snippet_list(request):
-    snippets = Snippet.objects.filter(user=request.user) \
-        .annotate(num_comments=Count('comment')) \
-        .order_by('-creation_date')
+    sort = request.GET.get('sort', 'creation_date')
+    order = request.GET.get('order', 'desc')
+
+    allowed_sorts = {
+        'name': 'name',
+        'lang': 'lang',
+        'creation_date': 'creation_date',
+        'updated_date': 'updated_date',
+        'is_public': 'is_public',
+        'num_comments': 'num_comments',
+        'views_count': 'views_count',
+    }
+
+    sort_field = allowed_sorts.get(sort, 'creation_date')
+    if order == 'desc':
+        sort_field = '-' + sort_field
+
+    snippets = (
+        Snippet.objects.filter(user=request.user)
+        .annotate(num_comments=Count('comment'))
+        .order_by(sort_field)
+    )
 
     paginator = Paginator(snippets, 5)
-
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
     context = {
         'snippets': snippets,
         'page_obj': page_obj,
+        'sort': sort,
+        'order': order,
     }
 
     return render(request, 'user_snippets.html', context=context)
