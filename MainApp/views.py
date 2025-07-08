@@ -23,7 +23,7 @@ def snippets_universal(request, user_only=False):
         'lang': 'lang',
         'creation_date': 'creation_date',
         'updated_date': 'updated_date',
-        'is_public': 'is_public',
+        'public': 'public',
         'num_comments': 'num_comments',
         'views_count': 'views_count',
     }
@@ -33,7 +33,7 @@ def snippets_universal(request, user_only=False):
 
     if user_only:
         if not request.user.is_authenticated:
-            return redirect('mainapp:custom_login')
+            return redirect('MainApp:custom_login')
         snippets = (
             Snippet.objects.filter(user=request.user)
             .annotate(num_comments=Count('comment'))
@@ -43,13 +43,13 @@ def snippets_universal(request, user_only=False):
     else:
         if request.user.is_authenticated:
             snippets = (
-                Snippet.objects.filter(Q(is_public=True) | Q(user=request.user))
+                Snippet.objects.filter(Q(public=True) | Q(user=request.user))
                 .annotate(num_comments=Count('comment'))
                 .order_by(sort_field)
             )
         else:
             snippets = (
-                Snippet.objects.filter(is_public=True)
+                Snippet.objects.filter(public=True)
                 .annotate(num_comments=Count('comment'))
                 .order_by(sort_field)
             )
@@ -94,25 +94,25 @@ def custom_login(request):
         user = auth.authenticate(request, username=username, password=password)
         if user is not None:
             auth.login(request, user)
-            return redirect('mainapp:home')
+            return redirect('MainApp:home')
         else:
             context = {
                 'errors': ['Неверные логин или пароль'],
                 'username': username,
             }
             return render(request, 'index.html', context)
-    return redirect('mainapp:home')
+    return redirect('MainApp:home')
 
 def custom_logout(request):
     auth.logout(request)
-    return redirect('mainapp:home')
+    return redirect('MainApp:home')
 
 def custom_registration(request):
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('mainapp:home')
+            return redirect('MainApp:home')
     else:
         form = UserRegistrationForm()
 
@@ -129,7 +129,7 @@ def add_snippet_page(request):
             snippet = form.save(commit=False)
             snippet.user = request.user
             snippet.save()
-            return redirect('mainapp:snippet-detail', id=snippet.pk)
+            return redirect('MainApp:snippet-detail', id=snippet.pk)
 
     context = {
         'pagename': 'Добавление нового сниппета',
@@ -148,7 +148,7 @@ def edit_snippet_page(request, pk):
         form = SnippetForm(request.POST, instance=snippet)
         if form.is_valid():
             form.save()
-            return redirect('mainapp:snippet-detail', id=snippet.pk)
+            return redirect('MainApp:snippet-detail', id=snippet.pk)
     else:
         form = SnippetForm(instance=snippet)
 
@@ -163,7 +163,7 @@ def delete_snippet_page(request, pk):
 
     if request.method == 'POST':
         snippet.delete()
-        return redirect('mainapp:user_snippets')
+        return redirect('Mainapp:user_snippets')
 
     return redirect('mainapp:user_snippets')
 
@@ -198,7 +198,7 @@ def search_snippets(request):
         query = form.cleaned_data['query']
         if query:
             snippets = Snippet.objects.filter(
-                Q(is_public=True),
+                Q(public=True),
                 Q(name__icontains=query) | Q(code__icontains=query) | Q(lang__icontains=query)
             ).annotate(num_comments=Count('comment')).order_by('-creation_date')
 
