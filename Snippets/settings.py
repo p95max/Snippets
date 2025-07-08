@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'crispy_bootstrap5',
     'django_extensions',
 
-    'mainapp',
+    'MainApp',
 ]
 
 MIDDLEWARE = [
@@ -68,7 +68,7 @@ TEMPLATES = [
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.request',
-                'mainapp.context_processors.search_form',
+                'MainApp.context_processors.search_form',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
@@ -141,3 +141,30 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
+LOGGING = {
+'version': 1,
+'disable_existing_loggers': False, # Не отключаем существующие логгеры
+
+'formatters': {
+    'sql_formatter': {
+        'format': '{levelname} {message} (Duration: {duration:.3f}s)', # Формат для SQL
+        'style': '{',
+    },
+},
+
+'handlers': {
+    'console_sql': { # Отдельный обработчик для SQL-запросов
+        'class': 'logging.StreamHandler',
+        'formatter': 'sql_formatter',
+        'level': 'DEBUG',
+    },
+},
+
+'loggers': {
+    'django.db.backends': {
+        'handlers': ['console_sql'], # Используем наш специальный обработчик
+        'level': 'DEBUG',           # Уровень DEBUG для отображения всех запросов
+        'propagate': False,         # Очень важно: отключаем всплытие, чтобы SQL не дублировался другими логгерами
+    },
+}
+}

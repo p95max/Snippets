@@ -4,37 +4,68 @@ from django.db import models
 from django.db.models import Count, Q
 from django.http import HttpResponseForbidden, HttpResponseNotAllowed
 from django.shortcuts import render, redirect, get_object_or_404
-from mainapp.models import Snippet, LANG_ICONS
-from mainapp.forms import SnippetForm, UserRegistrationForm, CommentForm, SnippetSearchForm
+from MainApp.models import Snippet, LANG_ICONS
+from MainApp.forms import SnippetForm, UserRegistrationForm, CommentForm, SnippetSearchForm
 from django.contrib import auth
+from django.shortcuts import render, redirect
+from django.db.models import Q, Count
+from django.core.paginator import Paginator
 
 def index_page(request):
     context = {'pagename': 'PythonBin'}
     return render(request, 'index.html', context)
+def snippets_universal(request, user_only=False):
+    sort = request.GET.get('sort', 'creation_date')
+    order = request.GET.get('order', 'desc')
 
-def snippets_page(request):
-    if request.user.is_authenticated:
-        snippets = Snippet.objects.filter(Q(is_public=True) | Q(user=request.user)
-        ).annotate(num_comments=Count('comment')) \
-         .order_by('-creation_date')
+    allowed_sorts = {
+        'name': 'name',
+        'lang': 'lang',
+        'creation_date': 'creation_date',
+        'updated_date': 'updated_date',
+        'is_public': 'is_public',
+        'num_comments': 'num_comments',
+        'views_count': 'views_count',
+    }
+    sort_field = allowed_sorts.get(sort, 'creation_date')
+    if order == 'desc':
+        sort_field = '-' + sort_field
+
+    if user_only:
+        if not request.user.is_authenticated:
+            return redirect('mainapp:custom_login')
+        snippets = (
+            Snippet.objects.filter(user=request.user)
+            .annotate(num_comments=Count('comment'))
+            .order_by(sort_field)
+        )
+        template = 'user_snippets.html'
     else:
-        snippets = Snippet.objects.filter(is_public=True) \
-            .annotate(num_comments=Count('comment')) \
-            .order_by('-creation_date')
-
-    for snippet in snippets:
-        snippet.icon_class = get_icon_class(snippet.lang)
+        if request.user.is_authenticated:
+            snippets = (
+                Snippet.objects.filter(Q(is_public=True) | Q(user=request.user))
+                .annotate(num_comments=Count('comment'))
+                .order_by(sort_field)
+            )
+        else:
+            snippets = (
+                Snippet.objects.filter(is_public=True)
+                .annotate(num_comments=Count('comment'))
+                .order_by(sort_field)
+            )
+        template = 'view_snippets.html'
 
     paginator = Paginator(snippets, 5)
-
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    return render(request, 'view_snippets.html', {
+    context = {
         'snippets': snippets,
-        'count_snippets': snippets.count(),
         'page_obj': page_obj,
-    })
+        'sort': sort,
+        'order': order,
+    }
+    return render(request, template, context)
 
 def snippet_detail(request, id):
     snippet = Snippet.objects.annotate(num_comments=Count('comment')).get(id=id)
@@ -53,44 +84,6 @@ def snippet_detail(request, id):
         'comment_form': comment_form,
     }
     return render(request, 'snippet_detail.html', context)
-
-@login_required
-def user_snippet_list(request):
-    sort = request.GET.get('sort', 'creation_date')
-    order = request.GET.get('order', 'desc')
-
-    allowed_sorts = {
-        'name': 'name',
-        'lang': 'lang',
-        'creation_date': 'creation_date',
-        'updated_date': 'updated_date',
-        'is_public': 'is_public',
-        'num_comments': 'num_comments',
-        'views_count': 'views_count',
-    }
-
-    sort_field = allowed_sorts.get(sort, 'creation_date')
-    if order == 'desc':
-        sort_field = '-' + sort_field
-
-    snippets = (
-        Snippet.objects.filter(user=request.user)
-        .annotate(num_comments=Count('comment'))
-        .order_by(sort_field)
-    )
-
-    paginator = Paginator(snippets, 5)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-
-    context = {
-        'snippets': snippets,
-        'page_obj': page_obj,
-        'sort': sort,
-        'order': order,
-    }
-
-    return render(request, 'user_snippets.html', context=context)
 
 # Custom auth
 def custom_login(request):

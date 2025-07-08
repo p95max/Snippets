@@ -1,13 +1,13 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from mainapp.models import Snippet, LANG_CHOICES, Comment
+from MainApp.models import Snippet, LANG_CHOICES, Comment
 
 
 class SnippetForm(forms.ModelForm):
     class Meta:
         model = Snippet
-        fields = ['name', 'lang', 'code', 'description', 'is_public']
+        fields = ['name', 'lang', 'code', 'description', 'public']
         labels = {
             'name': 'Название сниппета',
             'lang': 'Язык программирования',

@@ -79,7 +79,7 @@
     <tr>
         <td>{{ forloop.counter }}</td>
         <td>
-            <a href="{% url 'mainapp:snippet-detail' snippet.id %}" class="text-decoration-none">
+            <a href="{% url 'MainApp:snippet-detail' snippet.id %}" class="text-decoration-none">
                 {{ snippet.name }}
             </a>
         </td>
@@ -99,10 +99,10 @@
     <td>{{ snippet.num_comments|default:"-" }}</td>
         <td>{{ snippet.views_count }}</td>
         <td class="text-center">
-            <a href="{% url 'mainapp:snippet-edit' snippet.pk %}" class="btn btn-sm btn-outline-secondary">✎</a>
+            <a href="{% url 'MainApp:snippet-edit' snippet.pk %}" class="btn btn-sm btn-outline-secondary">✎</a>
         </td>
         <td class="text-center">
-            <form action="{% url 'mainapp:snippet-delete' snippet.pk %}" method="post" style="display:inline;">
+            <form action="{% url 'MainApp:snippet-delete' snippet.pk %}" method="post" style="display:inline;">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Удалить?');">✘</button>
             </form>
@@ -124,7 +124,7 @@
 
     <div class="row mt-3">
         <div class="col-6 offset-3">
-            <a href="{% url 'mainapp:snippet-add' %}" class="btn btn-info w-100 btn-sm">➕ Добавить сниппет</a>
+            <a href="{% url 'MainApp:snippet-add' %}" class="btn btn-info w-100 btn-sm">➕ Добавить сниппет</a>
         </div>
     </div>
 

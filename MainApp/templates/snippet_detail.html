@@ -51,7 +51,7 @@
 <div class="row mt-3">
     <div class="col">
         <h5>Добавить новый комментарий</h5>
-<form action="{% url 'mainapp:comment_add' %}" method="POST">
+<form action="{% url 'MainApp:comment_add' %}" method="POST">
     {% csrf_token %}
     {{ comment_form.text }}
     <input type="hidden" name="snippet_id" value="{{ snippet.id }}">
@@ -63,10 +63,10 @@
 {% else %}
 <div class="row mt-3">
     <div class="col">
-        <p><a href="{% url 'mainapp:custom_login' %}">Войдите</a>, чтобы оставить комментарий.</p>
+        <p><a href="{% url 'MainApp:custom_login' %}">Войдите</a>, чтобы оставить комментарий.</p>
     </div>
 </div>
 {% endif %}
-<a href="{% url 'mainapp:snippets-list' %}"><-- Назад к списку</a>
+<a href="{% url 'MainApp:snippets-list' %}"><-- Назад к списку</a>
 </div>
 {% endblock %}

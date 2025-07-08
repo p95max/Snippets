@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% load lang_tags %}
+
+{% block title %}Просмотр общих сниппетов{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+
+    <div class="text-center mb-3">
+        <h5 class="fw-bold mt-4">Общие/Публичные сниппеты</h5>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover table-sm align-middle">
+            <thead class="table-light small">
+    <tr>
+        <th>#</th>
+        <th>
+            <a href="?sort=name&order={% if sort == 'name' and order == 'asc' %}desc{% else %}asc{% endif %}">
+                Название
+                {% if sort == 'name' %}
+                    {% if order == 'asc' %}▲{% else %}▼{% endif %}
+                {% endif %}
+            </a>
+        </th>
+        <th>
+            <a href="?sort=lang&order={% if sort == 'lang' and order == 'asc' %}desc{% else %}asc{% endif %}">
+                Язык
+                {% if sort == 'lang' %}
+                    {% if order == 'asc' %}▲{% else %}▼{% endif %}
+                {% endif %}
+            </a>
+        </th>
+        <th>
+            <a href="?sort=creation_date&order={% if sort == 'creation_date' and order == 'asc' %}desc{% else %}asc{% endif %}">
+                Создан
+                {% if sort == 'creation_date' %}
+                    {% if order == 'asc' %}▲{% else %}▼{% endif %}
+                {% endif %}
+            </a>
+        </th>
+        <th>
+            <a href="?sort=updated_date&order={% if sort == 'updated_date' and order == 'asc' %}desc{% else %}asc{% endif %}">
+                Обновлён
+                {% if sort == 'updated_date' %}
+                    {% if order == 'asc' %}▲{% else %}▼{% endif %}
+                {% endif %}
+            </a>
+        </th>
+        <th>
+            <a href="?sort=is_public&order={% if sort == 'is_public' and order == 'asc' %}desc{% else %}asc{% endif %}">
+                Публичный?
+                {% if sort == 'is_public' %}
+                    {% if order == 'asc' %}▲{% else %}▼{% endif %}
+                {% endif %}
+            </a>
+        </th>
+        <th>
+            <a href="?sort=user&order={% if sort == 'user' and order == 'asc' %}desc{% else %}asc{% endif %}">
+                Автор
+                {% if sort == 'user' %}
+                    {% if order == 'asc' %}▲{% else %}▼{% endif %}
+                {% endif %}
+            </a>
+        </th>
+        <th>
+            <a href="?sort=num_comments&order={% if sort == 'num_comments' and order == 'asc' %}desc{% else %}asc{% endif %}">
+                Комментарии
+                {% if sort == 'num_comments' %}
+                    {% if order == 'asc' %}▲{% else %}▼{% endif %}
+                {% endif %}
+            </a>
+        </th>
+        <th>
+            <a href="?sort=views_count&order={% if sort == 'views_count' and order == 'asc' %}desc{% else %}asc{% endif %}">
+                👁 Просмотры
+                {% if sort == 'views_count' %}
+                    {% if order == 'asc' %}▲{% else %}▼{% endif %}
+                {% endif %}
+            </a>
+        </th>
+    </tr>
+</thead>
+<tbody class="small">
+    {% for snippet in page_obj %}
+      <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>
+              <a href="{% url 'MainApp:snippet-detail' snippet.id %}" class="text-decoration-none">
+                {{ snippet.name }}
+              </a>
+          </td>
+          <td>
+                <i class="{% lang_icon_class snippet.lang %}"></i>
+                <span>{{ snippet.lang }}</span>
+          </td>
+          <td>{{ snippet.creation_date|date:"d.m.Y H:i" }}</td>
+          <td>{{ snippet.updated_date|date:"d.m.Y H:i" }}</td>
+          <td>
+            {% if snippet.is_public %}
+                ✅
+            {% else %}
+                🔒
+            {% endif %}
+          </td>
+          <td> {{ snippet.user.username|default:"Аноним" }} </td>
+          <td>{{ snippet.num_comments|default:"-" }}</td>
+          <td>{{ snippet.views_count }}</td>
+      </tr>
+                {% empty %}
+      <tr>
+      <td colspan="9" class="text-center text-muted">Сниппеты отсутствуют</td>
+      </tr>
+            {% endfor %}
+    </tbody>
+</table>
+</div>
+
+    <div class="text-end mt-2 small">
+        <span class="text-muted">Всего общих сниппетов: {{ count_snippets }}</span>
+    </div>
+
+{% if request.user.is_authenticated %}
+    <div class="row mt-3">
+        <div class="col-6 offset-3">
+            <a href="{% url 'MainApp:snippet-add' %}" class="btn btn-info w-100 btn-sm">➕ Добавить сниппет</a>
+        </div>
+    </div>
+{% endif %}
+
+{% include 'includes/paginator.html' %}
+
+</div>
+{% endblock %}

@@ -1,15 +1,16 @@
 from django.urls import path
-from mainapp.views import (index_page, add_snippet_page, snippets_page, snippet_detail,
-                           edit_snippet_page, delete_snippet_page, custom_login, custom_logout, user_snippet_list,
+from MainApp.views import (index_page, add_snippet_page, snippet_detail,
+                           edit_snippet_page, delete_snippet_page, custom_login, custom_logout, snippets_universal,
                            custom_registration, comment_add, search_snippets)
+from django.contrib.auth.decorators import login_required
 
-app_name = 'mainapp'
+app_name = 'MainApp'
 
 urlpatterns = [
     path('', index_page, name="home"),
-    path('snippets/list', snippets_page, name="snippets-list"),
+    path('snippets/', snippets_universal, name='snippets-list'),
+    path('my-snippets/', login_required(lambda r: snippets_universal(r, user_only=True)), name='user_snippets'),
     path('snippet/<int:id>', snippet_detail, name="snippet-detail"),
-    path('user_snippets/', user_snippet_list, name="user_snippets"),
     path('search/', search_snippets, name='snippets-search'),
 
     # Custom auth

@@ -16,7 +16,7 @@
             <h5 class="card-title">{{ snippet.name }}</h5>
             <p class="card-text"><pre>{{ snippet.code|truncatechars:200 }}</pre></p>
             <span class="badge bg-secondary">{{ snippet.lang }}</span>
-            <a href="{% url 'mainapp:snippet-detail' snippet.id %}" class="btn btn-sm btn-outline-primary float-end">Подробнее</a>
+            <a href="{% url 'MainApp:snippet-detail' snippet.id %}" class="btn btn-sm btn-outline-primary float-end">Подробнее</a>
           </div>
         </div>
       {% endfor %}

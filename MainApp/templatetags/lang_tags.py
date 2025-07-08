@@ -1,4 +1,4 @@
-# mainapp/templatetags/lang_tags.py
+# MainApp/templatetags/lang_tags.py
 
 from django import template
 
