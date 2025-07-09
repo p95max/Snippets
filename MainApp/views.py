@@ -16,6 +16,7 @@ def index_page(request):
     context = {'pagename': 'PythonBin'}
     return render(request, 'index.html', context)
 def snippets_universal(request, user_only=False):
+    count_snippets = Snippet.objects.count()
     sort = request.GET.get('sort', 'creation_date')
     order = request.GET.get('order', 'desc')
 
@@ -79,6 +80,7 @@ def snippets_universal(request, user_only=False):
         'sort': sort,
         'order': order,
         'active_users': active_users,
+        'count_snippets': count_snippets,
     }
     return render(request, template, context)
 
