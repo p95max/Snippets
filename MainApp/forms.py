@@ -7,20 +7,24 @@ from MainApp.models import Snippet, LANG_CHOICES, Comment
 class SnippetForm(forms.ModelForm):
     class Meta:
         model = Snippet
-        fields = ['name', 'lang', 'code', 'description', 'public']
+        fields = ['name', 'lang', 'code', 'description', 'tags', 'public']
         labels = {
             'name': 'Название сниппета',
             'lang': 'Язык программирования',
             'code': 'Код',
             'description': 'Описание',
-            'is_public': 'Публичный сниппет',
+            'tags': 'Теги',
+            'public': 'Публичный сниппет',
+
         }
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите название'}),
             'lang': forms.Select(attrs={'class': 'form-control'}, choices=LANG_CHOICES),
             'code': forms.Textarea(attrs={'class': 'form-control', 'rows': 10, 'placeholder': 'Введите код'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Описание (опционально)'}),
-            'is_public': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'tags': forms.SelectMultiple(attrs={'class': 'form-select', 'size': 5}),
+            'public': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+
         }
 
     def clean_name(self):

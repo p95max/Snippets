@@ -11,12 +11,22 @@
                         Название:
                         <input type="text" value="{{ snippet.name }}" class="form-control">
 
-                        Язык:
+                        <strong>Язык:</strong>
                         <i class="{% lang_icon_class snippet.lang %}"></i>
                         <span>{{ snippet.get_lang_display }}</span>
+
+                        <div class="mt-2">
+                            <span class="fw-bold">Теги:</span>
+                            {% for tag in snippet.tags.all %}
+                                <span class="badge bg-primary me-2 mb-1">{{ tag.name }}</span>
+                            {% empty %}
+                                <span class="text-muted">нет</span>
+                            {% endfor %}
+                        </div>
                     </div>
                     <div class="col col-4">
-                        Дата создания: <input type="text" value="{{ snippet.creation_date|date:"d.m.Y H:i" }}" class="form-control">
+                        Дата создания:
+                        <input type="text" value="{{ snippet.creation_date|date:"d.m.Y H:i" }}" class="form-control">
                     </div>
                 </div>
                 <hr>
@@ -47,26 +57,25 @@
         </div>
     </div>
 
-   {% if user.is_authenticated %}
-<div class="row mt-3">
-    <div class="col">
-        <h5>Добавить новый комментарий</h5>
-<form action="{% url 'MainApp:comment_add' %}" method="POST">
-    {% csrf_token %}
-    {{ comment_form.text }}
-    <input type="hidden" name="snippet_id" value="{{ snippet.id }}">
-    <button type="submit" class="btn btn-primary mt-2">Добавить</button>
-</form><br>
-
+    {% if user.is_authenticated %}
+    <div class="row mt-3">
+        <div class="col">
+            <h5>Добавить новый комментарий</h5>
+            <form action="{% url 'MainApp:comment_add' %}" method="POST">
+                {% csrf_token %}
+                {{ comment_form.text }}
+                <input type="hidden" name="snippet_id" value="{{ snippet.id }}">
+                <button type="submit" class="btn btn-primary mt-2">Добавить</button>
+            </form><br>
+        </div>
     </div>
-</div>
-{% else %}
-<div class="row mt-3">
-    <div class="col">
-        <p><a href="{% url 'MainApp:custom_login' %}">Войдите</a>, чтобы оставить комментарий.</p>
+    {% else %}
+    <div class="row mt-3">
+        <div class="col">
+            <p><a href="{% url 'MainApp:custom_login' %}">Войдите</a>, чтобы оставить комментарий.</p>
+        </div>
     </div>
-</div>
-{% endif %}
-<a href="{% url 'MainApp:snippets-list' %}"><-- Назад к списку</a>
+    {% endif %}
+    <a href="{% url 'MainApp:snippets-list' %}"><-- Назад к списку</a>
 </div>
 {% endblock %}

@@ -9,11 +9,17 @@ LANG_CHOICES = [
     ('js', 'JavaScript'),
 ]
 LANG_ICONS = {
-    'python': 'fa-python',
-    'cpp': 'fa-c++',
-    'java': 'fa-java',
-    'js': 'fa-javascript',
+    'python': 'fa-brands fa-python',
+    'cpp': 'fa-solid fa-code',
+    'java': 'fa-brands fa-java',
+    'javascript': 'fa-brands fa-js',
 }
+
+class Tag(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name
 
 class Snippet(models.Model):
     name = models.CharField(max_length=100)
@@ -25,9 +31,10 @@ class Snippet(models.Model):
     views_count = models.PositiveIntegerField(default=0)
     user = models.ForeignKey(to=User, on_delete=models.CASCADE)
     public = models.BooleanField(default=False, verbose_name='Публичный сниппет')
+    tags = models.ManyToManyField(Tag, related_name='snippets', blank=True)
 
-    def __repr__(self):
-        return f"S: {self.name}|{self.lang} views:{self.views_count} public:{self.public} user:{self.user}"
+    def __str__(self):
+        return f"{self.name} ({self.get_lang_display})"
 
 class Comment(models.Model):
     text = models.TextField()
@@ -36,5 +43,5 @@ class Comment(models.Model):
     author = models.ForeignKey(to=User, on_delete=models.CASCADE)
     snippet = models.ForeignKey(to=Snippet, on_delete=models.CASCADE)
 
-    def __repr__(self):
-        return f"C: {self.text[:10]} author:{self.author} sn: {self.snippet.name}"
+    def __str__(self):
+        return f"{self.text[:10]}... by {self.author}"

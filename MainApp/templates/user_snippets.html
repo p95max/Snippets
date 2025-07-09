@@ -85,7 +85,7 @@
         </td>
         <td>
             <i class="{% lang_icon_class snippet.lang %}"></i>
-            <span>{{ snippet.get_lang_display }}</span>
+            <span>{{ snippet.lang }}</span>
         </td>
         <td>{{ snippet.creation_date|date:"d.m.Y H:i" }}</td>
         <td>{{ snippet.updated_date|date:"d.m.Y H:i" }}</td>
@@ -96,7 +96,7 @@
                 🔒
             {% endif %}
         </td>
-        <td>{{ snippet.num_comments|default:"-" }}</td>
+    <td>{{ snippet.num_comments|default:"-" }}</td>
         <td>{{ snippet.views_count }}</td>
         <td class="text-center">
             <a href="{% url 'MainApp:snippet-edit' snippet.pk %}" class="btn btn-sm btn-outline-secondary">✎</a>
@@ -110,7 +110,7 @@
     </tr>
     {% empty %}
     <tr>
-        <td colspan="10" class="text-center text-muted">У вас пока нет сниппетов.</td>
+        <td colspan="9" class="text-center text-muted">У вас пока нет сниппетов.</td>
     </tr>
     {% endfor %}
 </tbody>
