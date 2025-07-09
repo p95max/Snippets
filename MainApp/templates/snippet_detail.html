@@ -13,7 +13,7 @@
 
                         Язык:
                         <i class="{% lang_icon_class snippet.lang %}"></i>
-                        <span>{{ snippet.lang }}</span>
+                        <span>{{ snippet.get_lang_display }}</span>
                     </div>
                     <div class="col col-4">
                         Дата создания: <input type="text" value="{{ snippet.creation_date|date:"d.m.Y H:i" }}" class="form-control">

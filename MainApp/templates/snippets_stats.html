@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}Статистика сайта{% endblock %}
+
+{% block content %}
+<div class="my-4">
+
+    <h2 class="mb-4"><i class="fa-solid fa-chart-simple"></i> Статистика PythonBin</h2>
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fa-solid fa-code"></i> Всего сниппетов</h5>
+                    <p class="display-6 mb-0">{{ total_snippets }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fa-solid fa-globe"></i> Публичных сниппетов</h5>
+                    <p class="display-6 mb-0">{{ total_public_snippets }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fa-solid fa-eye"></i> Среднее число просмотров спиппета</h5>
+                   <p class="display-6 mb-0">
+                    {{ avg_snippets_views|floatformat:0|default:"0" }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mt-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fa-solid fa-fire"></i> Топ-5 самых просматриваемых сниппетов</h5>
+                    <ol class="mb-0">
+    {% for snip in top_5_snippets %}
+        <li>
+            <a href="{% url 'MainApp:snippet-detail' snip.id %}" class="fw-semibold text-decoration-none">
+                {{ snip.name }}
+            </a>
+            <span class="text-muted">— {{ snip.views_count }} просмотров</span>
+        </li>
+    {% empty %}
+        <li>Нет данных</li>
+    {% endfor %}
+</ol>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fa-solid fa-crown"></i> Топ-3 пользователя по количеству сниппетов</h5>
+                    <ol class="mb-0">
+                        {% for user in top_3_authors %}
+                            <li>
+                                <span class="fw-semibold">{{ user.username }}</span>
+                                <span class="text-muted">— {{ user.snippet_count }} сниппетов</span>
+                            </li>
+                        {% empty %}
+                            <li>Нет данных</li>
+                        {% endfor %}
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

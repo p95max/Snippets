@@ -1,7 +1,8 @@
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.core.paginator import Paginator
 from django.db import models
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Avg
 from django.http import HttpResponseForbidden, HttpResponseNotAllowed
 from django.shortcuts import render, redirect, get_object_or_404
 from MainApp.models import Snippet, LANG_ICONS
@@ -55,15 +56,27 @@ def snippets_universal(request, user_only=False):
             )
         template = 'view_snippets.html'
 
+    author_id = request.GET.get('author')
+    if author_id:
+        snippets = snippets.filter(user_id=author_id)
+
     paginator = Paginator(snippets, 5)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
+
+    active_users = (
+        User.objects
+        .filter(snippet__isnull=False)
+        .annotate(snippet_count=Count('snippet'))
+        .distinct()
+    )
 
     context = {
         'snippets': snippets,
         'page_obj': page_obj,
         'sort': sort,
         'order': order,
+        'active_users': active_users,
     }
     return render(request, template, context)
 
@@ -84,6 +97,31 @@ def snippet_detail(request, id):
         'comment_form': comment_form,
     }
     return render(request, 'snippet_detail.html', context)
+
+def snippets_stats(request):
+    total_snippets = Snippet.objects.count()
+    total_public_snippets = Snippet.objects.filter(public=True).count()
+    avg_snippets_views = Snippet.objects.aggregate(avg=Avg('views_count'))['avg']
+    aavg_snippets_views = round(avg_snippets_views)
+    top_5_snippets = Snippet.objects.order_by('-views_count').values('id', 'name', 'views_count')[:5]
+    top_3_authors = (
+        User.objects
+        .annotate(snippet_count=Count('snippet'))
+        .filter(snippet_count__gt=0)
+        .order_by('-snippet_count')[:3]
+        .values('username', 'snippet_count')
+    )
+
+    context = {
+        'total_snippets': total_snippets,
+        'total_public_snippets': total_public_snippets,
+        'avg_snippets_views': avg_snippets_views,
+        'top_5_snippets': top_5_snippets,
+        'top_3_authors': top_3_authors,
+    }
+
+    return render(request, 'snippets_stats.html', context=context)
+
 
 # Custom auth
 def custom_login(request):
