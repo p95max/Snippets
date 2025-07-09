@@ -32,6 +32,8 @@ def snippets_universal(request, user_only=False):
     if order == 'desc':
         sort_field = '-' + sort_field
 
+    author_id = request.GET.get('author')
+
     if user_only:
         if not request.user.is_authenticated:
             return redirect('MainApp:custom_login')
@@ -43,22 +45,22 @@ def snippets_universal(request, user_only=False):
         template = 'user_snippets.html'
     else:
         if request.user.is_authenticated:
-            snippets = (
-                Snippet.objects.filter(Q(public=True) | Q(user=request.user))
-                .annotate(num_comments=Count('comment'))
-                .order_by(sort_field)
-            )
+            base_qs = Snippet.objects.annotate(num_comments=Count('comment'))
+            if author_id:
+                if int(author_id) == request.user.id:
+                    snippets = base_qs.filter(user_id=author_id)
+                else:
+                    snippets = base_qs.filter(user_id=author_id, public=True)
+            else:
+                snippets = base_qs.filter(Q(public=True) | Q(user=request.user))
+            snippets = snippets.order_by(sort_field)
         else:
-            snippets = (
-                Snippet.objects.filter(public=True)
-                .annotate(num_comments=Count('comment'))
-                .order_by(sort_field)
-            )
+            base_qs = Snippet.objects.annotate(num_comments=Count('comment'))
+            if author_id:
+                snippets = base_qs.filter(user_id=author_id, public=True).order_by(sort_field)
+            else:
+                snippets = base_qs.filter(public=True).order_by(sort_field)
         template = 'view_snippets.html'
-
-    author_id = request.GET.get('author')
-    if author_id:
-        snippets = snippets.filter(user_id=author_id)
 
     paginator = Paginator(snippets, 5)
     page_number = request.GET.get('page')
@@ -235,10 +237,15 @@ def search_snippets(request):
     if form.is_valid():
         query = form.cleaned_data['query']
         if query:
-            snippets = Snippet.objects.filter(
-                Q(public=True),
-                Q(name__icontains=query) | Q(code__icontains=query) | Q(lang__icontains=query)
-            ).annotate(num_comments=Count('comment')).order_by('-creation_date')
+            base_q = Q(name__icontains=query) | Q(code__icontains=query) | Q(lang__icontains=query)
+            if request.user.is_authenticated:
+                snippets = Snippet.objects.filter(
+                    (Q(public=True) | Q(user=request.user)) & base_q
+                ).annotate(num_comments=Count('comment')).order_by('-creation_date')
+            else:
+                snippets = Snippet.objects.filter(
+                    Q(public=True) & base_q
+                ).annotate(num_comments=Count('comment')).order_by('-creation_date')
 
     paginator = Paginator(snippets, 5)
     page_number = request.GET.get('page')

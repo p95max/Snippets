@@ -90,7 +90,7 @@
         <td>{{ snippet.creation_date|date:"d.m.Y H:i" }}</td>
         <td>{{ snippet.updated_date|date:"d.m.Y H:i" }}</td>
         <td>
-            {% if snippet.is_public %}
+            {% if snippet.public %}
                 ✅
             {% else %}
                 🔒
