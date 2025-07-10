@@ -34,7 +34,7 @@ class Snippet(models.Model):
     tags = models.ManyToManyField(Tag, related_name='snippets', blank=True)
 
     def __str__(self):
-        return f"{self.name} ({self.get_lang_display})"
+        return f"{self.name} ({self.get_lang_display()})"
 
 class Comment(models.Model):
     text = models.TextField()
