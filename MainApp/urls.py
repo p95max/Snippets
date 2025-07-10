@@ -1,7 +1,7 @@
 from django.urls import path
 from MainApp.views import (index_page, add_snippet_page, snippet_detail,
                            edit_snippet_page, delete_snippet_page, custom_login, custom_logout, snippets_universal,
-                           custom_registration, comment_add, search_snippets, snippets_stats)
+                           custom_registration, comment_add, search_snippets, snippets_stats, snippets_by_tag)
 from django.contrib.auth.decorators import login_required
 
 app_name = 'MainApp'
@@ -13,6 +13,7 @@ urlpatterns = [
     path('snippets/stats/', snippets_stats, name='snippets-stats'),
     path('snippet/<int:id>', snippet_detail, name="snippet-detail"),
     path('search/', search_snippets, name='snippets-search'),
+    path('tag/<int:tag_id>/', snippets_by_tag, name='snippets_by_tag'),
 
     # Custom auth
     path('custom_login/', custom_login, name='custom_login'),

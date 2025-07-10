@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+
+  <h2>Сниппеты с тегом: <span class="badge bg-primary">{{ tag.name }}</span></h2><br>
+
+  {% for snippet in page_obj %}
+    <div>
+        <ul>
+            <li>
+            <a href="{% url 'MainApp:snippet-detail' snippet.id %}">{{ snippet.name }}</a>
+            </li>
+        </ul>
+    </div><br>
+  {% empty %}
+    <p>Нет сниппетов с этим тегом.</p>
+  {% endfor %}
+
+{% include 'includes/paginator.html' %}
+
+{% endblock %}

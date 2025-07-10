@@ -5,7 +5,7 @@ from django.db import models
 from django.db.models import Count, Q, Avg
 from django.http import HttpResponseForbidden, HttpResponseNotAllowed
 from django.shortcuts import render, redirect, get_object_or_404
-from MainApp.models import Snippet, LANG_ICONS
+from MainApp.models import Snippet, LANG_ICONS, Tag, Comment
 from MainApp.forms import SnippetForm, UserRegistrationForm, CommentForm, SnippetSearchForm
 from django.contrib import auth
 from django.shortcuts import render, redirect
@@ -89,6 +89,11 @@ def snippet_detail(request, id):
     viewed_key = f'snippet_{id}'
     comment_form = CommentForm()
 
+    comments = Comment.objects.filter(snippet=snippet).order_by('-creation_date')
+    paginator = Paginator(comments, 5)
+    page_number = request.GET.get('page')
+    comments_page = paginator.get_page(page_number)
+
 
     if not request.session.get(viewed_key, False):
         snippet.views_count += 1
@@ -99,8 +104,24 @@ def snippet_detail(request, id):
         'pagename': f'Сниппет: {snippet.name}',
         'snippet': snippet,
         'comment_form': comment_form,
+        'comments_page': comments_page,
     }
     return render(request, 'snippet_detail.html', context)
+
+def snippets_by_tag(request, tag_id):
+    tag = get_object_or_404(Tag, id=tag_id)
+    snippets = Snippet.objects.filter(tags__id=tag_id).order_by('-creation_date')
+    paginator = Paginator(snippets, 5)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'page_obj': page_obj,
+        'tag': tag,
+        'count_snippets': snippets.count(),
+        'pagename': f'Сниппеты с тегом: {tag.name}',
+    }
+    return render(request, 'snippets_by_tag.html', context)
 
 def snippets_stats(request):
     total_snippets = Snippet.objects.count()
