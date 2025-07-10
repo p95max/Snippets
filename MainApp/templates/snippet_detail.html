@@ -5,24 +5,26 @@
 <div class="container">
     <div class="row">
         <div class="col">
+
             <fieldset disabled>
                 <div class="row disabled">
                     <div class="col col-8">
                         Название:
                         <input type="text" value="{{ snippet.name }}" class="form-control">
 
-                        <strong>Язык:</strong>
-                        <i class="{% lang_icon_class snippet.lang %}"></i>
-                        <span>{{ snippet.get_lang_display }}</span>
+                        <div class="d-flex align-items-center mt-2 flex-wrap">
+                            <strong class="me-2">Язык:</strong>
+                            <i class="{% lang_icon_class snippet.lang %} me-1"></i>
+                            <span class="me-4">{{ snippet.get_lang_display }}</span>
 
-                        <div class="mt-2">
-                            <span class="fw-bold">Теги:</span>
+                            <span class="fw-bold me-2">Теги:</span>
                             {% for tag in snippet.tags.all %}
                                 <span class="badge bg-primary me-2 mb-1">{{ tag.name }}</span>
                             {% empty %}
                                 <span class="text-muted">нет</span>
                             {% endfor %}
                         </div>
+
                     </div>
                     <div class="col col-4">
                         Дата создания:
@@ -35,16 +37,25 @@
                         <div class="p-2 h-100" style="border:1px solid #ced4da; border-radius:5px; background-color: #1e1e1e; color: #f8f8f2; font-family: monospace; white-space: pre-wrap;">
                             <pre style="margin: 0; text-align: left">{{ snippet.code }}</pre>
                         </div>
-                        <p style="text-align: left">👁Просмотры: {{ snippet.views_count }}</p>
+                        <p style="text-align: left" > <strong>👁Просмотров:</strong> {{ snippet.views_count }}</p>
+
                     </div>
                 </div>
             </fieldset>
         </div>
+
     </div>
 
     <div class="row mt-4">
+
+        <div class="mt-2" style="text-align: left">
+            <i class="fa-solid fa-user me-1"></i>
+            <span class="fw-bold">Автор:</span>
+            <span>{{ snippet.user.username }}</span>
+        </div>
+
         <div class="col">
-            <h5>Все комментарии ({{ snippet.comment_set.count }})</h5>
+            <h5>Комментарии ({{ snippet.comment_set.count }})</h5>
 
             {% for comment in snippet.comment_set.all %}
                 <div class="border rounded p-2 mb-2">
