@@ -8,12 +8,6 @@ LANG_CHOICES = [
     ('java', 'Java'),
     ('js', 'JavaScript'),
 ]
-LANG_ICONS = {
-    'python': 'fa-brands fa-python',
-    'cpp': 'fa-solid fa-code',
-    'java': 'fa-brands fa-java',
-    'javascript': 'fa-brands fa-js',
-}
 
 class Tag(models.Model):
     name = models.CharField(max_length=100, unique=True)

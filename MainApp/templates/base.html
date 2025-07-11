@@ -1,5 +1,7 @@
 <!doctype html>
 {% load static %}
+{% load message_extras %}
+{% load lang_tags %}
 <html lang="ru" class="h-100">
 <head>
     <meta charset="utf-8" />
@@ -14,6 +16,16 @@
 <body class="d-flex flex-column h-100">
 
 {% include 'includes/navbar.html' %}
+
+{% if messages %}
+  <div class="container mt-3">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags|message_mapping }}" style="text-align: center;">
+        {{ message }}
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
 
 <main role="main" class="container">
     {% block content %}{% endblock %}

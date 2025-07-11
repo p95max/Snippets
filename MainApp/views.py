@@ -1,11 +1,9 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.core.paginator import Paginator
-from django.db import models
-from django.db.models import Count, Q, Avg
+from django.db.models import Avg
 from django.http import HttpResponseForbidden, HttpResponseNotAllowed
-from django.shortcuts import render, redirect, get_object_or_404
-from MainApp.models import Snippet, LANG_ICONS, Tag, Comment
+from django.shortcuts import get_object_or_404
+from MainApp.models import Snippet, Tag, Comment
 from MainApp.forms import SnippetForm, UserRegistrationForm, CommentForm, SnippetSearchForm
 from django.contrib import auth
 from django.shortcuts import render, redirect
@@ -170,16 +168,21 @@ def custom_logout(request):
     auth.logout(request)
     return redirect('MainApp:home')
 
+from django.contrib import messages
+
 def custom_registration(request):
-    if request.method == 'POST':
+    if request.method == "GET":
+        form = UserRegistrationForm()
+        return render(request, "custom_auth/register.html", {"form": form})
+
+    elif request.method == "POST":
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
-            form.save()
+            user = form.save()  #
+            messages.success(request, f'Добро пожаловать, {user.username}! Вы успешно зарегистрированы.')
             return redirect('MainApp:home')
-    else:
-        form = UserRegistrationForm()
-
-    return render(request, 'custom_auth/register.html', {'form': form})
+        else:
+            return render(request, "custom_auth/register.html", {"form": form})
 
 #CRUD
 @login_required
@@ -283,11 +286,6 @@ def search_snippets(request):
 
     return render(request, 'search_results.html', context=context)
 
-
-
-# UI
-def get_icon_class(lang):
-    return LANG_ICONS.get(lang)
 
 
 
