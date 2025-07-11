@@ -9,6 +9,8 @@ from django.contrib import auth
 from django.shortcuts import render, redirect
 from django.db.models import Q, Count
 from django.core.paginator import Paginator
+from MainApp.signals import snippet_views, snippet_deleted
+
 
 def index_page(request):
     context = {'pagename': 'PythonBin'}
@@ -92,10 +94,8 @@ def snippet_detail(request, id):
     page_number = request.GET.get('page')
     comments_page = paginator.get_page(page_number)
 
-
     if not request.session.get(viewed_key, False):
-        snippet.views_count += 1
-        snippet.save(update_fields=['views_count'])
+        snippet_views.send(sender=Snippet, snippet_id=snippet.id)
         request.session[viewed_key] = True
 
     context = {
@@ -104,7 +104,7 @@ def snippet_detail(request, id):
         'comment_form': comment_form,
         'comments_page': comments_page,
     }
-    return render(request, 'snippet_detail.html', context)
+    return render(request, 'snippet_detail.html', context=context)
 
 def snippets_by_tag(request, tag_id):
     tag = get_object_or_404(Tag, id=tag_id)
@@ -228,8 +228,10 @@ def delete_snippet_page(request, pk):
         return HttpResponseForbidden("Вы не можете удалить этот сниппет.")
 
     if request.method == 'POST':
+        snippet_id = snippet.id
         snippet.delete()
-        return redirect('Mainapp:user_snippets')
+        snippet_deleted.send(sender=Snippet, snippet_id=snippet_id)
+        return redirect('MainApp:user_snippets')
 
     return redirect('mainapp:user_snippets')
 

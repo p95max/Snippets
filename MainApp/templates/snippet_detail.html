@@ -56,11 +56,11 @@
             <span>{{ snippet.user.username }}</span>
         </div>
 
-# Comments
+{# Comments#}
         <div class="col">
-            <h5>Комментарии ({{ snippet.comment_set.count }})</h5>
+            <h5>Комментарии ({{ comments_page.paginator.count }})</h5>
 
-            {% for comment in snippet.comment_set.all %}
+            {% for comment in comments_page %}
                 <div class="border rounded p-2 mb-2">
                     <strong>{{ comment.author.username }}</strong> <small class="text-muted">{{ comment.creation_date|date:"d.m.Y H:i" }}</small>
                     <p>{{ comment.text|linebreaksbr }}</p>
@@ -71,7 +71,7 @@
         </div>
     </div>
 
-# Comments pagination
+{#Comments pagination#}
     <div>
     {% if comments_page.has_previous %}
         <a href="?page={{ comments_page.previous_page_number }}">Назад</a>

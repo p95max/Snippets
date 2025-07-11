@@ -31,6 +31,8 @@ class SnippetForm(forms.ModelForm):
         name = self.cleaned_data['name']
         if len(name) < 3:
             raise forms.ValidationError('Имя слишком короткое (должно быть минимум 3 символа)')
+        if len(name) > 20:
+            raise forms.ValidationError('Имя слишком длинное (максимум 20 символов)')
         return name
 
 

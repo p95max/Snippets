@@ -19,7 +19,7 @@ class Snippet(models.Model):
     name = models.CharField(max_length=100)
     lang = models.CharField(max_length=30, choices=LANG_CHOICES, default='-')
     code = models.TextField(max_length=5000)
-    creation_date = models.DateTimeField()
+    creation_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
     description = models.TextField(blank=True, null=True)
     views_count = models.PositiveIntegerField(default=0)
