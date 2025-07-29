@@ -1,5 +1,4 @@
 import logging
-
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver, Signal
@@ -14,8 +13,7 @@ logger = logging.getLogger(__name__)
 
 @receiver(snippet_deleted)
 def log_snippet_deleted(sender, snippet_id, **kwargs):
-    print(f"Сниппет с id={snippet_id} был удалён!")
-    logging.info(f"Сниппет с id={snippet_id} был удалён")
+    logger.info(f"Сниппет с id={snippet_id} был удалён.")
 
 @receiver(snippet_views)
 def snippet_views_counter(sender, snippet_id, **kwargs):

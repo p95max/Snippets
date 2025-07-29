@@ -17,6 +17,8 @@ def index_page(request):
     return render(request, 'index.html', context)
 def snippets_universal(request, user_only=False):
     count_snippets = Snippet.objects.count()
+
+    # Сортировка
     sort = request.GET.get('sort', 'creation_date')
     order = request.GET.get('order', 'desc')
 
@@ -35,6 +37,7 @@ def snippets_universal(request, user_only=False):
 
     author_id = request.GET.get('author')
 
+    # Сниппеты только авторизованных юзеров
     if user_only:
         if not request.user.is_authenticated:
             return redirect('MainApp:custom_login')
@@ -63,10 +66,14 @@ def snippets_universal(request, user_only=False):
                 snippets = base_qs.filter(public=True).order_by(sort_field)
         template = 'view_snippets.html'
 
+
+
+    # Пагинация
     paginator = Paginator(snippets, 5)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
+    # Сортировка по активным авторам
     active_users = (
         User.objects
         .filter(snippet__isnull=False)
@@ -82,18 +89,19 @@ def snippets_universal(request, user_only=False):
         'active_users': active_users,
         'count_snippets': count_snippets,
     }
-    return render(request, template, context)
+    return render(request, template, context=context)
 
 def snippet_detail(request, id):
     snippet = Snippet.objects.annotate(num_comments=Count('comment')).get(id=id)
     viewed_key = f'snippet_{id}'
     comment_form = CommentForm()
 
+    # Пагинация
     comments = Comment.objects.filter(snippet=snippet).order_by('-creation_date')
     paginator = Paginator(comments, 5)
     page_number = request.GET.get('page')
     comments_page = paginator.get_page(page_number)
-
+    # Счётчик количества просмотров через сигналы
     if not request.session.get(viewed_key, False):
         snippet_views.send(sender=Snippet, snippet_id=snippet.id)
         request.session[viewed_key] = True

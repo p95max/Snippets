@@ -12,7 +12,12 @@ django-extensions = "^4.1"
 django-crispy-forms = "^2.4"
 crispy-bootstrap5 = "^2025.6"
 ipython = "^9.4.0"
+pytest = "^8.4.1"
 
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.4.1"
+pytest-django = "^4.11.1"
 
 [build-system]
 requires = ["poetry-core"]

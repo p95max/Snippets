@@ -149,8 +149,18 @@ LOGGING = {
             'format': '{levelname} {message} (Duration: {duration:.3f}s)',
             'style': '{',
         },
+        'verbose': {
+            'format': '[{asctime}] {levelname} {name}: {message}',
+            'style': '{',
+        },
     },
     'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': 'logs/snippet_actions.log',
+            'formatter': 'verbose',
+        },
         'console_sql': {
             'class': 'logging.StreamHandler',
             'formatter': 'sql_formatter',
@@ -162,16 +172,13 @@ LOGGING = {
         },
     },
     'loggers': {
-
-# Логи запросов в БД
         # 'django.db.backends': {
         #     'handlers': ['console_sql'],
         #     'level': 'DEBUG',
         #     'propagate': False,
         # },
-
         'MainApp.signals': {
-            'handlers': ['console'],
+            'handlers': ['file', 'console'],
             'level': 'INFO',
             'propagate': False,
         },
