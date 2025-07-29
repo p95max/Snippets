@@ -1,6 +1,9 @@
 import pytest
-from django.db import IntegrityError
+import pytest
+from django.contrib.auth.models import User
+from django.db import transaction
 
+from MainApp.models import Snippet, Comment, Tag
 from MainApp.models import Tag
 
 
@@ -19,15 +22,42 @@ class TestTagModel:
         """Тест, что теги с одинаковыми именами недопустимы"""
         from django.db import IntegrityError
 
-        # Создаем первый тег
         tag1 = Tag.objects.create(name="Python")
 
-        # Пытаемся создать второй тег с тем же именем
-        # Должно возникнуть исключение IntegrityError
         with pytest.raises(IntegrityError):
-            Tag.objects.create(name="Python")
+            with transaction.atomic():
+                Tag.objects.create(name="Python")
 
-    @pytest.mark.django_db
-    def test_tag_count_after_duplicate_attempt(self):
-        Tag.objects.create(name="Python")
         assert Tag.objects.filter(name="Python").count() == 1
+        assert Tag.objects.get(name="Python") == tag1
+
+
+
+
+@pytest.mark.django_db
+class TestCommentModel:
+    """Тесты для модели Comment"""
+
+    def test_comment_creation(self):
+        """Тест создания комментария"""
+        user = User.objects.create_user(username="testuser", password="testpass")
+        tag = Tag.objects.create(name="Python")
+        snippet = Snippet.objects.create(
+            name="Test Snippet",
+            lang="python",
+            code="print('Hello, world!')",
+            user=user,
+        )
+        snippet.tags.add(tag)
+
+        comment = Comment.objects.create(
+            text="Отличный сниппет!",
+            author=user,
+            snippet=snippet,
+        )
+
+        assert Comment.objects.count() == 1
+        saved_comment = Comment.objects.first()
+        assert saved_comment.text == "Отличный сниппет!"
+        assert saved_comment.author == user
+        assert saved_comment.snippet == snippet
