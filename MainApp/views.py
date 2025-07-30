@@ -10,19 +10,15 @@ from django.shortcuts import render, redirect
 from django.db.models import Q, Count
 from django.core.paginator import Paginator
 from MainApp.signals import snippet_views, snippet_deleted
+from django.contrib import messages
 
 
 def index_page(request):
     context = {'pagename': 'PythonBin'}
     return render(request, 'index.html', context)
 
-from django.shortcuts import render
-from django.core.paginator import Paginator
-from django.db.models import Q, Count
-from django.contrib.auth.decorators import login_required
-from .models import Snippet, User
 
-def snippets_universal(request, user_only=False):
+def snippets_universal(request, user_only=False, num_snippets_on_page=5):
     pagename = 'Мои сниппеты' if user_only else 'Просмотр сниппетов'
     lang = request.GET.get('lang')
     user_id = request.GET.get('user_id')
@@ -59,7 +55,7 @@ def snippets_universal(request, user_only=False):
     else:
         qs = qs.order_by('-creation_date')
 
-    paginator = Paginator(qs, 5)
+    paginator = Paginator(qs, num_snippets_on_page)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     active_users = User.objects.filter(snippet__public=True).distinct()
@@ -163,7 +159,7 @@ def custom_logout(request):
     auth.logout(request)
     return redirect('MainApp:home')
 
-from django.contrib import messages
+
 
 def custom_registration(request):
     if request.method == "GET":
