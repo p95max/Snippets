@@ -15,6 +15,7 @@ from MainApp.signals import snippet_views, snippet_deleted
 def index_page(request):
     context = {'pagename': 'PythonBin'}
     return render(request, 'index.html', context)
+
 def snippets_universal(request, user_only=False):
     count_snippets = Snippet.objects.count()
 

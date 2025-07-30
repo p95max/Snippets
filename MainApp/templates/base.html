@@ -43,12 +43,12 @@
         integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
         crossorigin="anonymous"></script>
 <script>
-  setTimeout(function() {
-    document.querySelectorAll('.alert').forEach(function(alert) {
-      var bsAlert = new bootstrap.Alert(alert);
-      bsAlert.close();
-    });
-  }, 3000);
+setTimeout(function() {
+  document.querySelectorAll('.alert-autoclose').forEach(function(alert) {
+    var bsAlert = new bootstrap.Alert(alert);
+    bsAlert.close();
+  });
+}, 3000);
 </script>
 
 {% endblock %}
