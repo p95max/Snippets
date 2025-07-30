@@ -5,6 +5,7 @@ from django.urls import reverse
 from django.test import RequestFactory
 from MainApp.models import Snippet
 from MainApp.views import add_snippet_page
+from tests.factories import SnippetFactory
 
 
 class TestIndexPageView:
@@ -123,11 +124,6 @@ class TestEditSnippetPageView:
         assert snippet.code == "print('updated')"
 
 
-import pytest
-from django.urls import reverse
-from django.test import Client
-from django.contrib.auth.models import User
-from MainApp.models import Snippet
 
 @pytest.mark.django_db
 class TestSnippetsPage:

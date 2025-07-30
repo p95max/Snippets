@@ -184,3 +184,7 @@ LOGGING = {
         },
     },
 }
+
+SHELL_PLUS_PRE_IMPORTS = [
+    ('tests.factories', ('UserFactory', 'TagFactory', 'SnippetFactory', 'CommentFactory')),
+]

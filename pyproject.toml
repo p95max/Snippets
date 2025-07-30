@@ -13,6 +13,7 @@ django-crispy-forms = "^2.4"
 crispy-bootstrap5 = "^2025.6"
 ipython = "^9.4.0"
 pytest = "^8.4.1"
+factory-boy = "^3.3.3"
 
 
 [tool.poetry.group.dev.dependencies]
