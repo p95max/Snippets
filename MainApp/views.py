@@ -16,81 +16,67 @@ def index_page(request):
     context = {'pagename': 'PythonBin'}
     return render(request, 'index.html', context)
 
+from django.shortcuts import render
+from django.core.paginator import Paginator
+from django.db.models import Q, Count
+from django.contrib.auth.decorators import login_required
+from .models import Snippet, User
+
 def snippets_universal(request, user_only=False):
-    count_snippets = Snippet.objects.count()
-
-    # Сортировка
+    pagename = 'Мои сниппеты' if user_only else 'Просмотр сниппетов'
+    lang = request.GET.get('lang')
+    user_id = request.GET.get('user_id')
+    search = request.GET.get('search')
     sort = request.GET.get('sort', 'creation_date')
-    order = request.GET.get('order', 'desc')
+    order = ''
 
-    allowed_sorts = {
-        'name': 'name',
-        'lang': 'lang',
-        'creation_date': 'creation_date',
-        'updated_date': 'updated_date',
-        'public': 'public',
-        'num_comments': 'num_comments',
-        'views_count': 'views_count',
-    }
-    sort_field = allowed_sorts.get(sort, 'creation_date')
-    if order == 'desc':
-        sort_field = '-' + sort_field
+    qs = Snippet.objects.annotate(num_comments=Count('comment'))
 
-    author_id = request.GET.get('author')
-
-    # Сниппеты только авторизованных юзеров
     if user_only:
         if not request.user.is_authenticated:
-            return redirect('MainApp:custom_login')
-        snippets = (
-            Snippet.objects.filter(user=request.user)
-            .annotate(num_comments=Count('comment'))
-            .order_by(sort_field)
-        )
-        template = 'user_snippets.html'
-    else:
+            from django.core.exceptions import PermissionDenied
+            raise PermissionDenied()
+        qs = qs.filter(user=request.user)
+    elif user_id:
+        qs = qs.filter(user_id=user_id)
+    if lang:
+        qs = qs.filter(lang=lang)
+    if search:
+        qs = qs.filter(Q(name__icontains=search) | Q(code__icontains=search))
+    if not user_only:
         if request.user.is_authenticated:
-            base_qs = Snippet.objects.annotate(num_comments=Count('comment'))
-            if author_id:
-                if int(author_id) == request.user.id:
-                    snippets = base_qs.filter(user_id=author_id)
-                else:
-                    snippets = base_qs.filter(user_id=author_id, public=True)
-            else:
-                snippets = base_qs.filter(Q(public=True) | Q(user=request.user))
-            snippets = snippets.order_by(sort_field)
+            qs = qs.filter(Q(public=True) | Q(user=request.user))
         else:
-            base_qs = Snippet.objects.annotate(num_comments=Count('comment'))
-            if author_id:
-                snippets = base_qs.filter(user_id=author_id, public=True).order_by(sort_field)
-            else:
-                snippets = base_qs.filter(public=True).order_by(sort_field)
-        template = 'view_snippets.html'
+            qs = qs.filter(public=True)
 
+    if sort.startswith('-'):
+        order = '-'
+        sort_field = sort[1:]
+    else:
+        sort_field = sort
+    if sort_field in ['name', 'lang', 'creation_date']:
+        qs = qs.order_by(sort)
+    else:
+        qs = qs.order_by('-creation_date')
 
-
-    # Пагинация
-    paginator = Paginator(snippets, 5)
+    paginator = Paginator(qs, 5)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-
-    # Сортировка по активным авторам
-    active_users = (
-        User.objects
-        .filter(snippet__isnull=False)
-        .annotate(snippet_count=Count('snippet'))
-        .distinct()
-    )
+    active_users = User.objects.filter(snippet__public=True).distinct()
 
     context = {
-        'snippets': snippets,
-        'page_obj': page_obj,
+        'pagename': pagename,
+        'lang': lang,
+        'user_id': user_id,
+        'search': search,
         'sort': sort,
         'order': order,
         'active_users': active_users,
-        'count_snippets': count_snippets,
+        'count_snippets': qs.count(),
+        'page_obj': page_obj,
+        'snippets': page_obj,
     }
-    return render(request, template, context=context)
+    return render(request, 'view_snippets.html', context)
 
 def snippet_detail(request, id):
     snippet = Snippet.objects.annotate(num_comments=Count('comment')).get(id=id)
@@ -242,14 +228,14 @@ def delete_snippet_page(request, pk):
         snippet_deleted.send(sender=Snippet, snippet_id=snippet_id)
         return redirect('MainApp:user_snippets')
 
-    return redirect('mainapp:user_snippets')
+    return redirect('MainApp:user_snippets')
 
 # Comments
 @login_required
 def comment_add(request):
     if request.method == "POST":
         if not request.user.is_authenticated:
-            return redirect('mainapp:custom_login')
+            return redirect('MainApp:custom_login')
 
         comment_form = CommentForm(request.POST)
         snippet_id = request.POST.get('snippet_id')
@@ -260,9 +246,9 @@ def comment_add(request):
             comment.author = request.user
             comment.snippet = snippet
             comment.save()
-            return redirect('mainapp:snippet-detail', id=snippet_id)
+            return redirect('MainApp:snippet-detail', id=snippet_id)
 
-        return redirect('mainapp:snippet-detail', id=snippet_id)
+        return redirect('MainApp:snippet-detail', id=snippet_id)
 
     return HttpResponseNotAllowed(['POST'])
 
