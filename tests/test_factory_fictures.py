@@ -18,6 +18,7 @@ def test_create_tags(tag_factory):
     tags = tag_factory(["js", "basic", "oop"])
     assert [tag.name for tag in tags] == ["js", "basic", "oop"]
 
+
 # task 2
 @pytest.fixture
 def comment_factory():
@@ -34,6 +35,7 @@ def test_create_comments(comment_factory, user):
     for comment in comments:
         assert comment.snippet == snippet
         assert comment.author == user
+
 
 # task 3
 @pytest.fixture

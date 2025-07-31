@@ -14,11 +14,14 @@ crispy-bootstrap5 = "^2025.6"
 ipython = "^9.4.0"
 pytest = "^8.4.1"
 factory-boy = "^3.3.3"
+pytest-cov = "^6.2.1"
 
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.4.1"
 pytest-django = "^4.11.1"
+pytest-cov = "^6.2.1"
+coverage = "^7.10.1"
 
 [build-system]
 requires = ["poetry-core"]
