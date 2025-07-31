@@ -4,8 +4,9 @@ from django.test import Client
 from django.urls import reverse
 from django.test import RequestFactory
 from MainApp.models import Snippet
-from MainApp.views import add_snippet_page
-from tests.factories import SnippetFactory
+from MainApp.views import add_snippet_page, snippet_detail
+from tests.factories import SnippetFactory, UserFactory, TagFactory, CommentFactory
+from django.contrib.sessions.middleware import SessionMiddleware
 
 
 class TestIndexPageView:
@@ -389,6 +390,205 @@ class TestSnippetsPage:
         response = self.client.get(f"{url}?lang=nonexistent")
         assert response.status_code == 200
         assert len(response.context['page_obj']) == 0
+
+
+@pytest.mark.django_db
+class TestSnippetDetail:
+    def setup_method(self):
+        self.factory = RequestFactory()
+        self.client = Client()
+
+        self.user = UserFactory(username="testuser", email="test@example.com")
+        self.another_user = UserFactory(username="anotheruser", email="another@example.com")
+
+        self.public_snippet = SnippetFactory(
+            name="Public Python Snippet",
+            code="print('Hello, World!')",
+            lang="python",
+            user=self.user,
+            public=True,
+            views_count=5
+        )
+
+        self.private_snippet = SnippetFactory(
+            name="Private Python Snippet",
+            code="print('This is private')",
+            lang="python",
+            user=self.user,
+            public=False,
+            views_count=2
+        )
+
+        self.comment1 = CommentFactory(
+            text="Отличный код!",
+            author=self.user,
+            snippet=self.public_snippet
+        )
+
+        self.comment2 = CommentFactory(
+            text="Очень полезно",
+            author=self.another_user,
+            snippet=self.public_snippet
+        )
+
+    def test_snippet_detail_public_snippet_authenticated_user(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('MainApp:snippet-detail', kwargs={'id': self.public_snippet.id}))
+        assert response.status_code == 200
+        assert response.context['pagename'] == f'Сниппет: {self.public_snippet.name}'
+        assert response.context['snippet'] == self.public_snippet
+        assert 'comment_form' in response.context
+        assert response.context['comments_page'].paginator.count == 2
+
+    def test_snippet_detail_public_snippet_anonymous_user(self):
+        response = self.client.get(reverse('MainApp:snippet-detail', kwargs={'id': self.public_snippet.id}))
+        assert response.status_code == 200
+        assert response.context['snippet'] == self.public_snippet
+        assert 'comment_form' in response.context
+        assert response.context['comments_page'].paginator.count == 2
+
+    def test_snippet_detail_private_snippet_owner(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('MainApp:snippet-detail', kwargs={'id': self.private_snippet.id}))
+        assert response.status_code == 200
+        assert response.context['snippet'] == self.private_snippet
+        assert 'comment_form' in response.context
+
+    def test_snippet_detail_private_snippet_other_user(self):
+        self.client.force_login(self.another_user)
+        response = self.client.get(reverse('MainApp:snippet-detail', kwargs={'id': self.private_snippet.id}))
+        assert response.status_code == 200
+        assert response.context['snippet'] == self.private_snippet
+        assert 'comment_form' in response.context
+
+    def test_snippet_detail_private_snippet_anonymous_user(self):
+        response = self.client.get(reverse('MainApp:snippet-detail', kwargs={'id': self.private_snippet.id}))
+        assert response.status_code == 200
+        assert response.context['snippet'] == self.private_snippet
+        assert 'comment_form' in response.context
+
+    def test_snippet_detail_nonexistent_snippet(self):
+        self.client.force_login(self.user)
+        with pytest.raises(Snippet.DoesNotExist):
+            self.client.get(reverse('MainApp:snippet-detail', kwargs={'id': 99999}))
+
+    def test_snippet_detail_increments_views_count(self):
+        initial_views = self.public_snippet.views_count
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('MainApp:snippet-detail', kwargs={'id': self.public_snippet.id}))
+        assert response.status_code == 200
+        self.public_snippet.refresh_from_db()
+        # Если у тебя views_count увеличивается через сигнал, убедись что сигнал работает!
+        assert self.public_snippet.views_count == initial_views + 1
+
+    def test_snippet_detail_with_comments(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('MainApp:snippet-detail', kwargs={'id': self.public_snippet.id}))
+        assert response.status_code == 200
+        comments_page = response.context['comments_page']
+        assert comments_page.paginator.count == 2
+        comments = list(comments_page)
+        assert self.comment1 in comments
+        assert self.comment2 in comments
+
+    def test_snippet_detail_without_comments(self):
+        snippet_without_comments = SnippetFactory(
+            name="Snippet Without Comments",
+            code="print('No comments')",
+            lang="python",
+            user=self.user,
+            public=True
+        )
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('MainApp:snippet-detail', kwargs={'id': snippet_without_comments.id}))
+        assert response.status_code == 200
+        assert response.context['comments_page'].paginator.count == 0
+
+    def test_snippet_detail_comment_form_in_context(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('MainApp:snippet-detail', kwargs={'id': self.public_snippet.id}))
+        assert response.status_code == 200
+        assert 'comment_form' in response.context
+        assert response.context['comment_form'] is not None
+
+    def test_snippet_detail_using_request_factory(self):
+        request = self.factory.get(reverse('MainApp:snippet-detail', kwargs={'id': self.public_snippet.id}))
+        request.user = self.user
+        # Добавляем сессию
+        middleware = SessionMiddleware(lambda req: None)
+        middleware.process_request(request)
+        request.session.save()
+        response = snippet_detail(request, self.public_snippet.id)
+        assert response.status_code == 200
+        assert hasattr(response, 'content')
+
+    def test_snippet_detail_multiple_views_increment_count(self):
+        initial_views = self.public_snippet.views_count
+        self.client.force_login(self.user)
+        for i in range(3):
+            response = self.client.get(reverse('MainApp:snippet-detail', kwargs={'id': self.public_snippet.id}))
+            assert response.status_code == 200
+        self.public_snippet.refresh_from_db()
+
+        assert self.public_snippet.views_count == initial_views + 1
+
+    def test_snippet_detail_different_users_increment_count(self):
+        initial_views = self.public_snippet.views_count
+        self.client.force_login(self.user)
+        response1 = self.client.get(reverse('MainApp:snippet-detail', kwargs={'id': self.public_snippet.id}))
+        assert response1.status_code == 200
+        self.client.force_login(self.another_user)
+        response2 = self.client.get(reverse('MainApp:snippet-detail', kwargs={'id': self.public_snippet.id}))
+        assert response2.status_code == 200
+        self.public_snippet.refresh_from_db()
+        assert self.public_snippet.views_count == initial_views + 2
+
+    def test_snippet_detail_context_structure(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('MainApp:snippet-detail', kwargs={'id': self.public_snippet.id}))
+        assert response.status_code == 200
+        context = response.context
+        assert 'pagename' in context
+        assert 'snippet' in context
+        assert 'comments_page' in context
+        assert 'comment_form' in context
+        assert context['pagename'] == f'Сниппет: {self.public_snippet.name}'
+        assert context['snippet'] == self.public_snippet
+        assert hasattr(context['comments_page'], '__iter__')
+        assert context['comment_form'] is not None
+
+    def test_snippet_detail_with_factory_generated_data(self):
+        factory_snippet = SnippetFactory(user=self.user, public=True)
+        comments = CommentFactory.create_batch(3, snippet=factory_snippet)
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('MainApp:snippet-detail', kwargs={'id': factory_snippet.id}))
+        assert response.status_code == 200
+        assert response.context['snippet'] == factory_snippet
+        assert response.context['comments_page'].paginator.count == 3
+
+    def test_snippet_detail_with_tags(self):
+        python_tag = TagFactory(name='python')
+        django_tag = TagFactory(name='django')
+        web_tag = TagFactory(name='web')
+        snippet_with_tags = SnippetFactory(user=self.user, public=True)
+        snippet_with_tags.tags.clear()
+        snippet_with_tags.tags.add(python_tag, django_tag, web_tag)
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('MainApp:snippet-detail', kwargs={'id': snippet_with_tags.id}))
+        assert response.status_code == 200
+        assert response.context['snippet'] == snippet_with_tags
+        assert snippet_with_tags.tags.count() == 3
+
+    def test_snippet_detail_multiple_languages(self):
+        python_snippet = SnippetFactory(lang='python', user=self.user, public=True)
+        js_snippet = SnippetFactory(lang='javascript', user=self.user, public=True)
+        java_snippet = SnippetFactory(lang='java', user=self.user, public=True)
+        self.client.force_login(self.user)
+        for snippet in [python_snippet, js_snippet, java_snippet]:
+            response = self.client.get(reverse('MainApp:snippet-detail', kwargs={'id': snippet.id}))
+            assert response.status_code == 200
+            assert response.context['snippet'] == snippet
+            assert response.context['snippet'].lang in ['python', 'javascript', 'java']
 
 
 
