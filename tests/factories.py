@@ -7,10 +7,16 @@ class UserFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = User  # Указываем, какую модель будет создавать эта фабрика
         django_get_or_create = ('username',)  # Опционально: предотвращает создание дубликатов по username
+        skip_postgeneration_save = True
 
     username = factory.Sequence(lambda n: f'user_{n}')  # Генерирует user_0, user_1 и т.д.
     email = factory.LazyAttribute(lambda o: f'{o.username}@example.com')  # Зависит от других полей
     password = factory.PostGenerationMethodCall('set_password', 'defaultpassword')  # Для хеширования пароля
+
+    @factory.post_generation
+    def save_password_changes(self, create, extracted, **kwargs):
+        if create:
+            self.save()
 
 
 
@@ -18,6 +24,7 @@ class TagFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Tag
         django_get_or_create = ('name',)
+        skip_postgeneration_save = True
 
     name = factory.Sequence(lambda n: f'tag_{n}')
 
@@ -26,6 +33,7 @@ class TagFactory(factory.django.DjangoModelFactory):
 class SnippetFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Snippet
+        skip_postgeneration_save = True
 
     name = factory.Sequence(lambda n: f'snippet_{n}')
     lang = factory.Iterator(['python', 'cpp', 'java', 'javascript'])
@@ -56,6 +64,7 @@ class SnippetFactory(factory.django.DjangoModelFactory):
 class CommentFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Comment
+        skip_postgeneration_save = True
 
     text = factory.Faker('text', max_nb_chars=500)
     author = factory.SubFactory(UserFactory)

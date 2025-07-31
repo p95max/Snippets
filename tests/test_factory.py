@@ -1,7 +1,4 @@
 import pytest
-from IPython.core.release import authors
-from django.template.defaulttags import comment
-
 from tests.factories import *
 from MainApp.models import User
 
