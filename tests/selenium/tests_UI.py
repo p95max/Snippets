@@ -1,3 +1,5 @@
+import time
+
 from selenium.common import TimeoutException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -203,7 +205,7 @@ from tests.factories import UserFactory, SnippetFactory
 #
 #
 # # task 2
-#
+
 # @pytest.mark.django_db
 # def test_snippets_my_page_access_and_content(browser, live_server):
 #     """
@@ -357,6 +359,72 @@ from tests.factories import UserFactory, SnippetFactory
 #         f"Текст страницы должен содержать 'Общие/Публичные сниппеты', получен: {page_content}"
 
 # task 3
+
+""""
+1. переходим по ссылке добавления с проверкой авторизации юзера
+2. Получаем доступ к полям формы
+3. заполнить форму 
+4. отправить форму
+5. проверить добавление нового сниппета на стр
+"""
+
+@pytest.mark.django_db
+def test_add_snippet_full_flow(browser, live_server):
+    user = UserFactory()
+    password = "defaultpassword"
+
+    browser.get(f"{live_server.url}{reverse('MainApp:home')}")
+    try:
+        toggler = browser.find_element(By.CLASS_NAME, "navbar-toggler")
+        if toggler.is_displayed():
+            toggler.click()
+            WebDriverWait(browser, 5).until(
+                EC.visibility_of_element_located((By.ID, "navbarContent"))
+            )
+    except:
+        pass
+
+    WebDriverWait(browser, 10).until(
+        EC.visibility_of_element_located((By.CSS_SELECTOR, "input[name='username']"))
+    )
+    browser.find_element(By.CSS_SELECTOR, "input[name='username']").send_keys(user.username)
+    browser.find_element(By.CSS_SELECTOR, "input[name='password']").send_keys(password)
+    login_form = browser.find_element(By.CSS_SELECTOR, "form[action*='custom_login']")
+    browser.execute_script("arguments[0].submit();", login_form)
+    WebDriverWait(browser, 10).until(
+        EC.url_to_be(f"{live_server.url}{reverse('MainApp:home')}")
+    )
+
+    browser.get(f"{live_server.url}{reverse('MainApp:snippet-add')}")
+
+    form = WebDriverWait(browser, 10).until(
+        EC.visibility_of_element_located((By.CSS_SELECTOR, "form.w-50"))
+    )
+
+    form.find_element(By.NAME, "name").send_keys("UI Selenium Test")
+    form.find_element(By.NAME, "lang").send_keys("Python")
+    form.find_element(By.NAME, "code").send_keys("print('Hello from Selenium!')")
+    form.find_element(By.NAME, "description").send_keys("UI тестовое описание")
+
+    public_checkbox = form.find_element(By.NAME, "public")
+    browser.execute_script("arguments[0].scrollIntoView({block: 'center'});", public_checkbox)
+    time.sleep(0.2)
+    browser.execute_script("arguments[0].click();", public_checkbox)
+
+    submit_btn = form.find_element(By.CSS_SELECTOR, "button[type='submit']")
+    browser.execute_script("arguments[0].scrollIntoView({block: 'center'});", submit_btn)
+    time.sleep(0.2)
+    browser.save_screenshot("before_click_submit_btn.png")
+    browser.execute_script("arguments[0].click();", submit_btn)
+
+    print("Current URL:", browser.current_url)
+    print("Page source:", browser.page_source)
+
+    WebDriverWait(browser, 10).until(
+        EC.visibility_of_element_located((By.XPATH, "//input[@value='UI Selenium Test']"))
+    )
+
+
 
 
 
