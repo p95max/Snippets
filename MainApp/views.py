@@ -24,7 +24,6 @@ def index_page(request):
 
 
 def snippets_list(request):
-    print(f"[DEBUG] snippets_list called, user={request.user}")
     pagename = 'Просмотр сниппетов'
     lang = request.GET.get('lang')
     user_id = request.GET.get('user_id')
@@ -92,7 +91,6 @@ def my_snippets(request, per_page = 5):
         'order': request.GET.get('order', ''),
     }
     return render(request, 'user_snippets.html', context)
-
 
 
 def snippet_detail(request, id):

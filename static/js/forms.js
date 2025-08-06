@@ -1,4 +1,4 @@
-// Подсчет количества символов в поле код у формы доб. и ред. сниппетов
+// Подсчет количества символов в поле код у форм доб. и ред. сниппетов
 document.addEventListener('DOMContentLoaded', function () {
 const codeField = document.getElementById('id_code');
 const counter = document.getElementById('code-char-count');
@@ -25,3 +25,5 @@ if (codeField && counter) {
   codeField.addEventListener('input', updateCount);
 }
 });
+
+

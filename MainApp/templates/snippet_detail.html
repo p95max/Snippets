@@ -6,6 +6,7 @@
     <div class="row">
         <div class="col">
 
+            <!-- Блок с полями, визуально отключён -->
             <fieldset disabled>
                 <div class="row disabled">
                     <div class="col col-8">
@@ -17,14 +18,14 @@
                             <i class="{% lang_icon_class snippet.lang %} me-1"></i>
                             <span class="me-4">{{ snippet.get_lang_display }}</span>
 
-                        <span class="fw-bold me-2">Теги:</span>
-                        {% for tag in snippet.tags.all %}
-                            <a href="{% url 'MainApp:snippets_by_tag' tag.id %}" class="badge bg-primary me-2 mb-1 text-decoration-none">
-                                {{ tag.name }}
-                            </a>
-                        {% empty %}
-                            <span class="text-muted">нет</span>
-                        {% endfor %}
+                            <span class="fw-bold me-2">Теги:</span>
+                            {% for tag in snippet.tags.all %}
+                                <a href="{% url 'MainApp:snippets_by_tag' tag.id %}" class="badge bg-primary me-2 mb-1 text-decoration-none">
+                                    {{ tag.name }}
+                                </a>
+                            {% empty %}
+                                <span class="text-muted">нет</span>
+                            {% endfor %}
                         </div>
 
                     </div>
@@ -33,36 +34,38 @@
                         <input type="text" value="{{ snippet.creation_date|date:"d.m.Y H:i" }}" class="form-control">
                     </div>
                 </div>
-                <hr>
-                <div class="row">
-                    <div class="col">
-                        <div class="p-2 h-100" style="border:1px solid #ced4da; border-radius:5px; background-color: #1e1e1e; color: #f8f8f2; font-family: monospace; white-space: pre-wrap;">
-                            <pre style="margin: 0; text-align: left">{{ snippet.code }}</pre>
-                        </div>
-                        <p style="text-align: left" > <strong>👁Просмотров:</strong> {{ snippet.views_count }}</p>
-
-                    </div>
-                </div>
             </fieldset>
-        </div>
 
+            <hr>
+
+            <!-- Код и кнопка копирования (не отключена!) -->
+            <div class="row">
+                <div class="col">
+                    <div class="p-2 h-100 position-relative" style="border:1px solid #ced4da; border-radius:5px; background-color: #1e1e1e; color: #f8f8f2; font-family: monospace; white-space: pre-wrap;">
+                        <button class="btn btn-sm btn-light position-absolute top-0 end-0 m-2 copy-btn" title="Скопировать">📋</button>
+                        <code class="snippet-code d-block" style="margin: 0; text-align: left;">{{ snippet.code|escape }}</code>
+                    </div>
+                    <p style="text-align: left"><strong>👁Просмотров:</strong> {{ snippet.views_count }}</p>
+                </div>
+            </div>
+
+        </div>
     </div>
 
     <div class="row mt-4">
-
         <div class="mt-2" style="text-align: left">
             <i class="fa-solid fa-user me-1"></i>
             <span class="fw-bold">Автор:</span>
             <span>{{ snippet.user.username }}</span>
         </div>
 
-{# Comments#}
+        <!-- Комментарии -->
         <div class="col">
             <h5>Комментарии ({{ comments_page.paginator.count }})</h5>
-
             {% for comment in comments_page %}
                 <div class="border rounded p-2 mb-2">
-                    <strong>{{ comment.author.username }}</strong> <small class="text-muted">{{ comment.creation_date|date:"d.m.Y H:i" }}</small>
+                    <strong>{{ comment.author.username }}</strong>
+                    <small class="text-muted">{{ comment.creation_date|date:"d.m.Y H:i" }}</small>
                     <p>{{ comment.text|linebreaksbr }}</p>
                 </div>
             {% empty %}
@@ -71,38 +74,39 @@
         </div>
     </div>
 
-{#Comments pagination#}
+    <!-- Пагинация комментариев -->
     <div>
-    {% if comments_page.has_previous %}
-        <a href="?page={{ comments_page.previous_page_number }}">Назад</a>
-    {% endif %}
-    <span>Страница {{ comments_page.number }} из {{ comments_page.paginator.num_pages }}</span>
-    {% if comments_page.has_next %}
-        <a href="?page={{ comments_page.next_page_number }}">Вперёд</a>
-    {% endif %}
+        {% if comments_page.has_previous %}
+            <a href="?page={{ comments_page.previous_page_number }}">Назад</a>
+        {% endif %}
+        <span>Страница {{ comments_page.number }} из {{ comments_page.paginator.num_pages }}</span>
+        {% if comments_page.has_next %}
+            <a href="?page={{ comments_page.next_page_number }}">Вперёд</a>
+        {% endif %}
     </div>
 
+    <!-- Форма добавления комментария -->
     {% if user.is_authenticated %}
-    <div class="row mt-3">
-        <div class="col">
-            <h5>Добавить новый комментарий</h5>
-            <form action="{% url 'MainApp:comment_add' %}" method="POST">
-                {% csrf_token %}
-                {{ comment_form.text }}
-                <input type="hidden" name="snippet_id" value="{{ snippet.id }}">
-                <button type="submit" class="btn btn-primary mt-2">Добавить</button>
-            </form><br>
+        <div class="row mt-3">
+            <div class="col">
+                <h5>Добавить новый комментарий</h5>
+                <form action="{% url 'MainApp:comment_add' %}" method="POST">
+                    {% csrf_token %}
+                    {{ comment_form.text }}
+                    <input type="hidden" name="snippet_id" value="{{ snippet.id }}">
+                    <button type="submit" class="btn btn-primary mt-2">Добавить</button>
+                </form><br>
+            </div>
         </div>
-    </div>
     {% else %}
-    <div class="row mt-3">
-        <div class="col">
-            <p><a href="{% url 'MainApp:custom_login' %}">Войдите</a>, чтобы оставить комментарий.</p>
+        <div class="row mt-3">
+            <div class="col">
+                <p><a href="{% url 'MainApp:custom_login' %}">Войдите</a>, чтобы оставить комментарий.</p>
+            </div>
         </div>
-    </div>
     {% endif %}
 
     <a href="{% url 'MainApp:snippets-list' %}"><-- Назад к списку</a>
 </div>
-
 {% endblock %}
+
