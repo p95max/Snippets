@@ -1,4 +1,6 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block content %}
 
     <div class="container">
@@ -34,4 +36,8 @@
 </div>
 
 </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ block.super }}
 {% endblock %}

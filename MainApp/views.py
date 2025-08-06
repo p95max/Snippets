@@ -15,49 +15,53 @@ from django.contrib import messages
 
 def index_page(request):
     context = {'pagename': 'PythonBin'}
+
+    messages.success(request, 'Добро пожаловать на сайт!')
+    messages.info(request, 'Добро пожаловать на сайт!')
+    messages.warning(request, 'Добро пожаловать на сайт!')
+
     return render(request, 'index.html', context)
 
 
-def snippets_universal(request, user_only=False, num_snippets_on_page=5):
-    pagename = 'Мои сниппеты' if user_only else 'Просмотр сниппетов'
+def snippets_list(request):
+    print(f"[DEBUG] snippets_list called, user={request.user}")
+    pagename = 'Просмотр сниппетов'
     lang = request.GET.get('lang')
     user_id = request.GET.get('user_id')
     search = request.GET.get('search')
     sort = request.GET.get('sort', 'creation_date')
-    order = ''
 
     qs = Snippet.objects.annotate(num_comments=Count('comment'))
 
-    if user_only:
-        if not request.user.is_authenticated:
-            from django.core.exceptions import PermissionDenied
-            raise PermissionDenied()
-        qs = qs.filter(user=request.user)
-    elif user_id:
+    if user_id:
         qs = qs.filter(user_id=user_id)
     if lang:
         qs = qs.filter(lang=lang)
     if search:
         qs = qs.filter(Q(name__icontains=search) | Q(code__icontains=search))
-    if not user_only:
-        if request.user.is_authenticated:
-            qs = qs.filter(Q(public=True) | Q(user=request.user))
-        else:
-            qs = qs.filter(public=True)
 
+    # Показываем только публичные или свои сниппеты
+    if request.user.is_authenticated:
+        qs = qs.filter(Q(public=True) | Q(user=request.user))
+    else:
+        qs = qs.filter(public=True)
+
+    # Сортировка
+    allowed_fields = ['name', 'lang', 'creation_date']
     if sort.startswith('-'):
-        order = '-'
         sort_field = sort[1:]
     else:
         sort_field = sort
-    if sort_field in ['name', 'lang', 'creation_date']:
-        qs = qs.order_by(sort)
-    else:
-        qs = qs.order_by('-creation_date')
+    if sort_field not in allowed_fields:
+        sort = '-creation_date'  # сортировка по умолчанию
 
-    paginator = Paginator(qs, num_snippets_on_page)
+    qs = qs.order_by(sort)
+
+    # Пагинация
+    paginator = Paginator(qs, 5)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
+
     active_users = User.objects.filter(snippet__public=True).distinct()
 
     context = {
@@ -66,13 +70,30 @@ def snippets_universal(request, user_only=False, num_snippets_on_page=5):
         'user_id': user_id,
         'search': search,
         'sort': sort,
-        'order': order,
         'active_users': active_users,
         'count_snippets': qs.count(),
         'page_obj': page_obj,
         'snippets': page_obj,
     }
     return render(request, 'view_snippets.html', context)
+
+@login_required
+def my_snippets(request, per_page = 5):
+    qs = Snippet.objects.filter(user=request.user)
+
+    paginator = Paginator(qs, per_page)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'page_obj': page_obj,
+        'count_snippets': qs.count(),
+        'sort': request.GET.get('sort', ''),
+        'order': request.GET.get('order', ''),
+    }
+    return render(request, 'user_snippets.html', context)
+
+
 
 def snippet_detail(request, id):
     snippet = Snippet.objects.annotate(num_comments=Count('comment')).get(id=id)

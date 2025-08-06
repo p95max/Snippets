@@ -52,3 +52,13 @@ footer {
   color: #40E0D0 !important;
 }
 
+.notification {
+  transition: opacity 0.5s ease;
+  opacity: 1;
+}
+
+.notification.hide {
+  opacity: 0;
+}
+
+

@@ -10,27 +10,37 @@
   <div class="collapse navbar-collapse" id="navbarContent">
     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
       <li class="nav-item">
-          <a class="nav-link" href="{% url 'MainApp:snippets-list' %}"><strong>Общие сниппеты |</strong></a>
+        <a class="nav-link" href="{% url 'MainApp:snippets-list' %}">
+          <strong>Общие сниппеты |</strong>
+        </a>
+      </li>
+
       {% if request.user.is_authenticated %}
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'MainApp:user_snippets' %}"><strong>Мои сниппеты |</strong></a>
-        </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'MainApp:user-snippets' %}">
+          <strong>Мои сниппеты |</strong>
+        </a>
+      </li>
       {% endif %}
-          </li>
-          <li class="nav-item">
-          <a class="nav-link" href="{% url 'MainApp:snippets-stats' %}"><strong>Статистика сервиса |</strong></a>
+
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'MainApp:snippets-stats' %}">
+          <strong>Статистика сервиса |</strong>
+        </a>
       </li>
     </ul>
 
     {% if request.user.is_authenticated %}
 
-    {% include 'includes/search_form.html' %}
+      {% include 'includes/search_form.html' %}
 
       <span class="navbar-text me-3" style="color:#c9d1d9;">
         Добро пожаловать, <span style="color:#56d364;">{{ request.user.username }}</span>
       </span>
       <a class="btn btn-outline-light" href="{% url 'MainApp:custom_logout' %}">Выйти</a>
+
     {% else %}
+
       <form class="d-flex align-items-center" action="{% url 'MainApp:custom_login' %}" method="post" style="gap:0.5rem;">
         {% csrf_token %}
         <input class="form-control form-control-sm" type="text" name="username" placeholder="Имя пользователя" required style="width: 150px;">
@@ -38,13 +48,15 @@
         <button class="btn btn-sm btn-outline-success" type="submit">Войти</button>
         <a class="btn btn-sm btn-outline-info" href="{% url 'MainApp:custom_regist' %}">Регистрация</a>
       </form>
+
       {% if errors %}
-        <ul class="text-danger small mt-2 mb-0">
-          {% for error in errors %}
-            <li>{{ error }}</li>
-          {% endfor %}
-        </ul>
+      <ul class="text-danger small mt-2 mb-0">
+        {% for error in errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+      </ul>
       {% endif %}
+
     {% endif %}
   </div>
 </header>

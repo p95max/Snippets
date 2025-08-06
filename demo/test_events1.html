@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        body {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          margin: 0;
+          flex-direction: column;
+        }
+    </style>
+</head>
+<body>
+
+<h1>-----------task 1--------------</h1><br>
+
+<button id="changeTextButton">Click</button>
+<p id="myText">Text</p>
+
+<script>
+    const changeTextButton = document.getElementById('changeTextButton');
+    const par = document.getElementById('myText');
+    changeTextButton.addEventListener('click', function () {
+        par.textContent = 'Text changed';
+    });
+</script>
+
+<h1>-----------task 2--------------</h1><br>
+
+<button id="toggleButton">Hide/Show</button>
+<div id="box" style="width: 100px; height: 100px; background-color: lightblue;">Text</div>
+<style>
+  .hidden {
+    display: none;
+  }
+</style>
+<script>
+  const toggleButton = document.getElementById('toggleButton');
+  const box = document.getElementById('box');
+  toggleButton.addEventListener('click', function () {
+    box.classList.toggle('hidden');
+  });
+</script>
+
+
+
+<h1>-----------task 3--------------</h1><br>
+
+<ul>
+    <li>Item 1</li>
+    <li>Item 2</li>
+</ul>
+
+<button id="addItemButton">Add Item</button><br>
+
+<script>
+    const ul = document.querySelector('ul');
+    const button = document.getElementById('addItemButton');
+
+    button.addEventListener('click', function() {
+        const newLi = document.createElement('li');
+        newLi.textContent = 'New item';
+        ul.appendChild(newLi);
+    });
+</script>
+
+
+<h1>-----------task 4--------------</h1><br>
+
+<div id="colorBox" class="colorBox"></div>
+<style>
+    .colorBox {
+        width: 150px;
+        height: 150px;
+        background-color: orange;
+    }
+</style>
+<script>
+  const colorBox = document.getElementById('colorBox');
+
+  colorBox.addEventListener('mouseover', function() {
+    colorBox.style.backgroundColor = 'green';
+  });
+
+  colorBox.addEventListener('mouseout', function() {
+    colorBox.style.backgroundColor = 'orange';
+  });
+</script>
+
+<h1>-----------task 5--------------</h1><br>
+<input type="text" name="name" placeholder="Enter your name">
+<button id="submitButton5">Submit</button>
+<p id="greetingMessage"></p>
+
+<script>
+
+    const input5 = document.querySelector('input[name="name"]');
+    const button5 = document.getElementById('submitButton5');
+    const greeting = document.getElementById('greetingMessage');
+
+    button5.addEventListener('click', function() {
+        const name = input5.value;
+        if (name) {
+            greeting.textContent = `Hello, ${name}`;
+        } else {
+            greeting.textContent = `Enter your name`;
+        }
+    });
+</script>
+
+<h1>-----------task 6--------------</h1><br>
+<ul id="itemList6">
+    <li>Задача 1 <button class="delete-btn6">Удалить</button></li>
+    <li>Задача 2 <button class="delete-btn6">Удалить</button></li>
+    <li>Задача 3 <button class="delete-btn6">Удалить</button></li>
+</ul>
+<script>
+    const allButtons = document.querySelectorAll('.delete-btn6');
+
+    allButtons.forEach(button => {
+        button.addEventListener('click', function (event) {
+            event.target.parentElement.remove();
+        });
+    });
+</script>
+
+<h1>-----------task 7--------------</h1><br>
+<button id="counterButton">Нажми меня</button>
+<p>Количество кликов: <span id="clickCount">0</span></p>
+
+<script>
+    const counterButton = document.getElementById('counterButton');
+    const clickCount = document.getElementById('clickCount');
+
+    let count = 0;
+
+    counterButton.addEventListener('click', function () {
+        count = count + 1;
+        clickCount.textContent = count;
+    });
+</script>
+
+<h1>-----------task 8--------------</h1><br>
+
+
+<div class="box8"></div>
+<div class="box8"></div>
+<div class="box8"></div>
+
+<button id="highlightButton">Подсветить блоки</button>
+
+
+<style>
+  .box8 {
+    width: 100px;
+    height: 100px;
+    background-color: lightgray;
+    margin: 10px;
+  }
+
+  .highlight {
+    background-color: yellow;
+    border: 2px solid orange;
+  }
+</style>
+
+<script>
+  const boxes = document.querySelectorAll('.box8');
+  const button = document.getElementById('highlightButton');
+
+  button.addEventListener('click', function () {
+    boxes.forEach(function (box) {
+      box.classList.toggle('highlight');
+    });
+  });
+</script>
+
+
+
+
+
+</body>
+</html>

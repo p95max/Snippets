@@ -9,7 +9,21 @@
 <div class="container d-flex justify-content-center mt-5">
   <form method="post" class="w-50">
     {% csrf_token %}
-    {{ form|crispy }}
+    {{ form.name|as_crispy_field }}
+    {{ form.lang|as_crispy_field }}
+
+    <div class="mb-3">
+      {{ form.code.label_tag }}
+      {{ form.code }}
+      <small id="code-length" class="form-text">
+        Символов: <span id="code-char-count" class="fw-bold">0</span>
+      </small>
+    </div>
+
+    {{ form.description|as_crispy_field }}
+    {{ form.tags|as_crispy_field }}
+    {{ form.public|as_crispy_field }}
+
     <button type="submit" class="btn btn-primary">Отредактировать</button>
 
 <ul class="non-field-errors">
