@@ -90,11 +90,14 @@
         <div class="row mt-3">
             <div class="col">
                 <h5>Добавить новый комментарий</h5>
-                <form action="{% url 'MainApp:comment_add' %}" method="POST">
+                <form action="{% url 'MainApp:comment_add' %}" method="POST" id="comment-form">
                     {% csrf_token %}
                     {{ comment_form.text }}
+                    <div class="d-flex justify-content-between align-items-center mt-1">
+                        <small id="char-counter" class="text-muted">0/500</small>
+                    </div>
                     <input type="hidden" name="snippet_id" value="{{ snippet.id }}">
-                    <button type="submit" class="btn btn-primary mt-2">Добавить</button>
+                    <button type="submit" class="btn btn-primary mt-2" id="submit-btn" disabled>Добавить</button>
                 </form><br>
             </div>
         </div>
