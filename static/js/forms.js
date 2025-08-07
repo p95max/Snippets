@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       }
 
+
       if (codeField && counter) {
         updateCount();
         codeField.addEventListener('input', updateCount);
