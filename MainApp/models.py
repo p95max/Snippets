@@ -21,7 +21,7 @@ class Snippet(models.Model):
     code = models.TextField(max_length=5000)
     creation_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
-    description = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True, null=True, max_length=5000)
     views_count = models.PositiveIntegerField(default=0)
     user = models.ForeignKey(to=User, on_delete=models.CASCADE)
     public = models.BooleanField(default=False, verbose_name='Публичный сниппет')
