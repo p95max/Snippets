@@ -178,4 +178,16 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+// сброс фильтров
+document.addEventListener('DOMContentLoaded', function() {
+    const resetBtn = document.getElementById('reset-filters-btn');
+    const form = document.getElementById('filter-form');
+
+    resetBtn.addEventListener('click', function() {
+
+        form.reset();
+        form.submit();
+    });
+});
+
 
