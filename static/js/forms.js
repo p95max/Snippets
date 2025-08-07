@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
           counter.classList.add('text-danger');
         }
 
+
         // Ограничение длины: если превышено, обрезаем
         if (length > maxLength) {
           codeField.value = codeField.value.slice(0, maxLength);
