@@ -1,34 +1,39 @@
 from django.urls import path
+from MainApp.views import (index_page, add_snippet_page, snippet_detail,
+                           edit_snippet_page, delete_snippet_page, custom_login, custom_logout, snippets_list,
+                           custom_registration, comment_add, search_snippets, snippets_stats, snippets_by_tag, my_snippets,
+                           user_notifications, mark_notification_read)
+from MainApp.views_api import simple_api_view, api_test_page
 
 app_name = 'MainApp'
 
 urlpatterns = [
-    path('', 'MainApp.views.index_page', name="home"),
-    path('snippets/', 'MainApp.views.snippets_list', name='snippets-list'),
-    path('my-snippets/', 'MainApp.views.my_snippets', name='user-snippets'),
-    path('snippets/stats/', 'MainApp.views.snippets_stats', name='snippets-stats'),
-    path('snippet/<int:id>', 'MainApp.views.snippet_detail', name="snippet-detail"),
-    path('search/', 'MainApp.views.search_snippets', name='snippets-search'),
-    path('tag/<int:tag_id>/', 'MainApp.views.snippets_by_tag', name='snippets_by_tag'),
+    path('', index_page, name="home"),
+    path('snippets/', snippets_list, name='snippets-list'),
+    path('my-snippets/', my_snippets, name='user-snippets'),
+    path('snippets/stats/', snippets_stats, name='snippets-stats'),
+    path('snippet/<int:id>', snippet_detail, name="snippet-detail"),
+    path('search/', search_snippets, name='snippets-search'),
+    path('tag/<int:tag_id>/', snippets_by_tag, name='snippets_by_tag'),
 
     # Custom auth
-    path('custom_login/', 'MainApp.views.custom_login', name='custom_login'),
-    path('logout/', 'MainApp.views.custom_logout', name='custom_logout'),
-    path('regist/', 'MainApp.views.custom_registration', name='custom_regist'),
+    path('custom_login/', custom_login, name='custom_login'),
+    path('logout/', custom_logout, name='custom_logout'),
+    path('regist/', custom_registration, name='custom_regist'),
 
-    # CRUD
-    path('snippets/add', 'MainApp.views.add_snippet_page', name="snippet-add"),
-    path('snippet/<int:pk>/edit', 'MainApp.views.edit_snippet_page', name="snippet-edit"),
-    path('snippet/<int:pk>/delete', 'MainApp.views.delete_snippet_page', name="snippet-delete"),
+    #CRUD
+    path('snippets/add', add_snippet_page, name="snippet-add"),
+    path('snippet/<int:pk>/edit', edit_snippet_page, name="snippet-edit"),
+    path('snippet/<int:pk>/delete', delete_snippet_page, name="snippet-delete"),
 
     # Comments
-    path('comment/add', 'MainApp.views.comment_add', name='comment_add'),
+    path('comment/add', comment_add, name='comment_add'),
 
     # Notifications
-    path('notifications/', 'MainApp.views.user_notifications', name='notifications'),
-    path('notifications/mark-read/<int:pk>/', 'MainApp.views.mark_notification_read', name='mark_notification_read'),
+    path('notifications/', user_notifications, name='notifications'),
+    path('notifications/mark-read/<int:pk>/', mark_notification_read, name='mark_notification_read'),
 
     # API endpoints
-    path('api/simple-data/', 'MainApp.views_api.simple_api_view', name='simple_api'),
-    path('api-test/', 'MainApp.views_api.api_test_page', name='api_test_page'),
+    path('api/simple-data/', simple_api_view, name='simple_api'),
+    path('api-test/', api_test_page, name='api_test_page'),
 ]
