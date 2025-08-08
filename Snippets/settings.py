@@ -69,6 +69,7 @@ TEMPLATES = [
             'context_processors': [
                 'django.template.context_processors.request',
                 'MainApp.context_processors.search_form',
+                'MainApp.context_processors.unread_notifications_count',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
