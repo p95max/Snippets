@@ -10,12 +10,12 @@
     <div class="container">
         <div class="row">
             <div class="col">
-                <h1 class="mb-4">
+                <h2 class="mb-4">
                     Мои уведомления
                     {% if unread_count > 0 %}
                         <span class="badge bg-danger">{{ unread_count }}</span>
                     {% endif %}
-                </h1>
+                </h2>
                 <div class="row">
                     {% if page_obj %}
                         {% for n in page_obj %}

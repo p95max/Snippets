@@ -39,14 +39,14 @@
       </span>
 
     <a class="btn btn-outline-warning me-2" href="{% url 'MainApp:notifications' %}">
-      Уведомления
+      🔔Уведомления
       {% if unread_count > 0 %}
         <span class="badge bg-danger">{{ unread_count }}</span>
       {% endif %}
     </a>
 
 
-      <a class="btn btn-outline-light" href="{% url 'MainApp:custom_logout' %}">Выйти</a>
+      <a class="btn btn-outline-light" href="{% url 'MainApp:custom_logout' %}">🚪Выйти</a>
 
     {% else %}
 
