@@ -265,11 +265,15 @@ def comment_add(request):
 
 # Notifications
 @login_required
-def user_notifications(request):
+def user_notifications(request, per_page=5):
     notifications = Notification.objects.filter(recipient=request.user)
 
+    paginator = Paginator(notifications, per_page)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     context = {
-        'notifications': notifications,
+        'page_obj': page_obj,
         'pagename': 'Мои уведомления',
     }
 

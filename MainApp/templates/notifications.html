@@ -10,54 +10,66 @@
     <div class="container">
         <div class="row">
             <div class="col">
-                <h1 class="mb-4">Мои уведомления</h1>
+                <h1 class="mb-4">
+                    Мои уведомления
+                    {% if unread_count > 0 %}
+                        <span class="badge bg-danger">{{ unread_count }}</span>
+                    {% endif %}
+                </h1>
                 <div class="row">
-                    {% if notifications %}
-                        {% for n in notifications %}
+                    {% if page_obj %}
+                        {% for n in page_obj %}
                             <div class="col-12 mb-3">
                                 <div class="card border {% if not n.is_read %}border-3 border-warning bg-light shadow-sm{% endif %}">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <div>
-            <h6 class="mb-0">
-                {% if n.notification_type == 'comment' %}
-                    <i class="fas fa-comment text-primary"></i>
-                {% elif n.notification_type == 'like' %}
-                    <i class="fas fa-heart text-danger"></i>
-                {% elif n.notification_type == 'follow' %}
-                    <i class="fas fa-user-plus text-success"></i>
-                {% else %}
-                    <i class="fas fa-bell text-secondary"></i>
-                {% endif %}
-                {{ n.get_notification_type_display }}
-                {% if not n.is_read %}
-                    <span class="badge bg-warning text-dark ms-2">Новое</span>
-                {% endif %}
-            </h6>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-    <small class="text-muted">{{ n.created_at|date:"d.m.Y H:i" }}</small>
-<small>Статус: {% if n.is_read %}<span class="text-success">Прочитано</span>{% else %}<span class="text-danger">Не прочитано</span>{% endif %}</small>
-    {% if not n.is_read %}
-        <form method="post" action="{% url 'MainApp:mark_notification_read' n.id %}" style="display:inline;">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-sm btn-outline-success ms-2">Пометить как прочитаное</button>
-        </form>
-    {% endif %}
-</div>
-    </div>
-    <div class="card-body">
-        <div class="fw-bold mb-1">{{ n.title }}</div>
-        <p class="card-text mb-2">{{ n.message }}</p>
-        {% if n.notification_type == 'comment' and n.snippet %}
-            <a href="{% url 'MainApp:snippet-detail' n.snippet.id %}"
-               class="btn btn-sm btn-outline-primary">
-                Перейти к сниппету
-            </a>
-        {% endif %}
-    </div>
-</div>
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-0">
+                                                {% if n.notification_type == 'comment' %}
+                                                    <i class="fas fa-comment text-primary"></i>
+                                                {% elif n.notification_type == 'like' %}
+                                                    <i class="fas fa-heart text-danger"></i>
+                                                {% elif n.notification_type == 'follow' %}
+                                                    <i class="fas fa-user-plus text-success"></i>
+                                                {% else %}
+                                                    <i class="fas fa-bell text-secondary"></i>
+                                                {% endif %}
+                                                {{ n.get_notification_type_display }}
+                                            </h6>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <small class="text-muted">{{ n.created_at|date:"d.m.Y H:i" }}</small>
+                                            <small>
+                                                Статус:
+                                                {% if n.is_read %}
+                                                    <span class="text-success">Прочитано</span>
+                                                {% else %}
+                                                    <span class="text-danger">Не прочитано</span>
+                                                {% endif %}
+                                            </small>
+                                            {% if not n.is_read %}
+                                                <form method="post" action="{% url 'MainApp:mark_notification_read' n.id %}" style="display:inline;">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-sm btn-outline-success ms-2">Прочитано</button>
+                                                </form>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="card-text mb-2">{{ n.message }}</p>
+                                        {% if n.notification_type == 'comment' and n.snippet %}
+                                            <a href="{% url 'MainApp:snippet-detail' n.snippet.id %}"
+                                               class="btn btn-sm btn-outline-primary">
+                                                к сниппету
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
                             </div>
                         {% endfor %}
+
+
+                        {% include 'includes/paginator.html' %}
+
                     {% else %}
                         <div class="col-12">
                             <div class="alert alert-info mt-3">У вас нет уведомлений.</div>
