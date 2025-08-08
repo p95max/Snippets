@@ -1,7 +1,8 @@
 from django.urls import path
 from MainApp.views import (index_page, add_snippet_page, snippet_detail,
                            edit_snippet_page, delete_snippet_page, custom_login, custom_logout, snippets_list,
-                           custom_registration, comment_add, search_snippets, snippets_stats, snippets_by_tag, my_snippets)
+                           custom_registration, comment_add, search_snippets, snippets_stats, snippets_by_tag, my_snippets,
+                           user_notifications, mark_notification_read)
 
 app_name = 'MainApp'
 
@@ -26,4 +27,8 @@ urlpatterns = [
 
     # Comments
     path('comment/add', comment_add, name='comment_add'),
+
+    # Notifications
+    path('notifications/', user_notifications, name='notifications'),
+    path('notifications/mark-read/<int:pk>/', mark_notification_read, name='mark_notification_read'),
 ]

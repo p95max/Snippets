@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver, Signal
 from django.db.models import F
-from MainApp.models import Snippet, Comment
+from MainApp.models import Snippet, Comment, Notification
 
 snippet_views = Signal()
 snippet_deleted = Signal()
@@ -31,4 +31,10 @@ def send_message(sender, instance, created, **kwargs):
 @receiver(post_save, sender=Comment)
 def create_comment_notification(sender, instance, created, **kwargs):
     if created and instance.snippet.user and instance.author != instance.snippet.user:
-        pass
+        Notification.objects.create(
+            recipient=instance.snippet.user,
+            notification_type='comment',
+            title='Новый комментарий',
+            message=f"{instance.author.username} оставил комментарий: {instance.text[:50]}",
+            snippet=instance.snippet,
+        )

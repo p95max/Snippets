@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.db.models import Avg
 from django.http import HttpResponseForbidden, HttpResponseNotAllowed
 from django.shortcuts import get_object_or_404
-from MainApp.models import Snippet, Tag, Comment
+from MainApp.models import Snippet, Tag, Comment, Notification
 from MainApp.forms import SnippetForm, UserRegistrationForm, CommentForm, SnippetSearchForm
 from django.contrib import auth
 from django.shortcuts import render, redirect
@@ -15,10 +15,6 @@ from django.contrib import messages
 
 def index_page(request):
     context = {'pagename': 'PythonBin'}
-
-    messages.success(request, 'Добро пожаловать на сайт!')
-    messages.info(request, 'Добро пожаловать на сайт!')
-    messages.warning(request, 'Добро пожаловать на сайт!')
 
     return render(request, 'index.html', context)
 
@@ -266,6 +262,25 @@ def comment_add(request):
         return redirect('MainApp:snippet-detail', id=snippet_id)
 
     return HttpResponseNotAllowed(['POST'])
+
+# Notifications
+@login_required
+def user_notifications(request):
+    notifications = Notification.objects.filter(recipient=request.user)
+
+    context = {
+        'notifications': notifications,
+        'pagename': 'Мои уведомления',
+    }
+
+    return render(request, 'notifications.html', context=context)
+
+@login_required
+def mark_notification_read(request, pk):
+    notif = get_object_or_404(Notification, pk=pk, recipient=request.user)
+    notif.is_read = True
+    notif.save()
+    return redirect('MainApp:notifications')
 
 def search_snippets(request):
     form = SnippetSearchForm(request.GET)
