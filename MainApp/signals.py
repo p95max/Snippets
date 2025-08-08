@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver, Signal
 from django.db.models import F
-from MainApp.models import Snippet
+from MainApp.models import Snippet, Comment
 
 snippet_views = Signal()
 snippet_deleted = Signal()
@@ -27,3 +27,8 @@ def send_message(sender, instance, created, **kwargs):
         print(f"Отправитель: '{sender.__name__}'")
         print(f"ID пользователя: '{instance.id}'")
         print(f"--- Конец сигнала ---")
+
+@receiver(post_save, sender=Comment)
+def create_comment_notification(sender, instance, created, **kwargs):
+    if created and instance.snippet.user and instance.author != instance.snippet.user:
+        pass

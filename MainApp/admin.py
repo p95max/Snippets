@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.db.models import Count
 
-from MainApp.models import Snippet, Comment, Tag
+from MainApp.models import Snippet, Comment, Tag, Notification
 
 
 # Snippet
@@ -43,6 +43,13 @@ class TagAdmin(admin.ModelAdmin):
 
     search_fields = ('name',)
 
+
+# Notification
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ('title', 'created_at', 'recipient')
+
+    search_fields = ('title', 'recipient')
 
 admin.site.site_header = "PythonBin - администрирование"
 admin.site.site_title = "PythonBin Admin"

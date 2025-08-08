@@ -15,7 +15,11 @@ class Tag(models.Model):
     def __str__(self):
         return self.name
 
+
+
 class Snippet(models.Model):
+
+
     name = models.CharField(max_length=100)
     lang = models.CharField(max_length=30, choices=LANG_CHOICES, default='-')
     code = models.TextField(max_length=5000)
@@ -30,6 +34,8 @@ class Snippet(models.Model):
     def __str__(self):
         return f"{self.name} ({self.get_lang_display()})"
 
+
+
 class Comment(models.Model):
     text = models.TextField()
     creation_date = models.DateTimeField(auto_now_add=True)
@@ -39,3 +45,25 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"{self.text[:10]}... by {self.author}"
+
+
+
+class Notification(models.Model):
+    NOTIFICATION_TYPES = [
+        ('comment', 'Новый комментарий'),
+        ('like', 'Новый лайк'),
+        ('follow', 'Новый подписчик'),
+    ]
+
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    notification_type = models.CharField(max_length=20, choices=NOTIFICATION_TYPES)
+    title = models.CharField(max_length=255)
+    message = models.TextField()
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Уведомление для {self.recipient.username}: {self.title}"

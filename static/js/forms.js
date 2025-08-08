@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// сброс фильтров
+// сброс фильтров на стр общих сниппетов
 document.addEventListener('DOMContentLoaded', function() {
     const resetBtn = document.getElementById('reset-filters-btn');
     const form = document.getElementById('filter-form');
