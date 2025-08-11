@@ -2,7 +2,7 @@ from django.urls import path
 from MainApp.views import (index_page, add_snippet_page, snippet_detail,
                            edit_snippet_page, delete_snippet_page, custom_login, custom_logout, snippets_list,
                            custom_registration, comment_add, search_snippets, snippets_stats, snippets_by_tag, my_snippets,
-                           user_notifications, unread_notifications_longpoll, mark_notification_read)
+                           user_notifications, unread_notifications_longpoll, mark_notification_read, delete_notification, delete_all_read_notifications)
 from MainApp.views_api import simple_api_view, api_test_page
 
 app_name = 'MainApp'
@@ -33,6 +33,8 @@ urlpatterns = [
     path('notifications/', user_notifications, name='notifications'),
     path('api/unread-notifications-longpoll/', unread_notifications_longpoll, name='unread_notifications_longpoll'),
     path('notifications/mark-read/<int:pk>/', mark_notification_read, name='mark_notification_read'),
+    path('notifications/delete/<int:pk>/', delete_notification, name='delete_notification'),
+    path('notifications/delete-all-read/', delete_all_read_notifications, name='delete_all_read_notifications'),
 
     # API endpoints
     path('api/simple-data/', simple_api_view, name='simple_api'),

@@ -322,6 +322,19 @@ def unread_notifications_longpoll(request):
         'timestamp': str(datetime.now())
     })
 
+@login_required
+def delete_notification(request, pk):
+    notif = get_object_or_404(Notification, pk=pk, recipient=request.user)
+    if request.method == 'POST':
+        notif.delete()
+    return redirect('MainApp:notifications')
+
+@login_required
+def delete_all_read_notifications(request):
+    if request.method == 'POST':
+        Notification.objects.filter(recipient=request.user, is_read=True).delete()
+    return redirect('MainApp:notifications')
+
 def search_snippets(request):
     form = SnippetSearchForm(request.GET)
     query = ''

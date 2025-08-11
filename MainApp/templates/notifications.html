@@ -13,7 +13,7 @@
                 <h2 class="mb-4">
                     Мои уведомления
                     {% if unread_count > 0 %}
-                        <span class="badge bg-danger">{{ unread_count }}</span>
+                        <span class="badge bg-danger">{{ unread_count }} новых</span>
                     {% endif %}
                 </h2>
                 <div class="row">
@@ -33,7 +33,13 @@
                                                 {% else %}
                                                     <i class="fas fa-bell text-secondary"></i>
                                                 {% endif %}
+
                                                 {{ n.get_notification_type_display }}
+                                                {% if not n.is_read %}
+                                                <span class="badge bg-danger">
+                                                    <i class="fas fa-star me-1"></i>new
+                                                </span>
+                                                {% endif %}
                                             </h6>
                                         </div>
                                         <div class="d-flex align-items-center gap-2">
@@ -52,6 +58,12 @@
                                                     <button type="submit" class="btn btn-sm btn-outline-success ms-2">Прочитано</button>
                                                 </form>
                                             {% endif %}
+
+                                        <form method="post" action="{% url 'MainApp:delete_notification' n.id %}" style="display:inline;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-outline-danger ms-2">❌</button>
+                                        </form>
+
                                         </div>
                                     </div>
                                     <div class="card-body">
@@ -62,11 +74,18 @@
                                                 к сниппету
                                             </a>
                                         {% endif %}
+
                                     </div>
                                 </div>
                             </div>
                         {% endfor %}
 
+                        <form method="post" action="{% url 'MainApp:delete_all_read_notifications' %}" class="mt-4 text-end">
+                        {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">
+                            🗑️Очистить прочитанные уведомления
+                            </button>
+                        </form>
 
                         {% include 'includes/paginator.html' %}
 
