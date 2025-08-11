@@ -1,7 +1,9 @@
+import time
+from datetime import datetime
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db.models import Avg
-from django.http import HttpResponseForbidden, HttpResponseNotAllowed
+from django.http import HttpResponseForbidden, HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import get_object_or_404
 from MainApp.models import Snippet, Tag, Comment, Notification
 from MainApp.forms import SnippetForm, UserRegistrationForm, CommentForm, SnippetSearchForm
@@ -285,6 +287,40 @@ def mark_notification_read(request, pk):
     notif.is_read = True
     notif.save()
     return redirect('MainApp:notifications')
+
+
+@login_required
+def unread_notifications_longpoll(request):
+    """
+    Long polling endpoint для получения количества непрочитанных уведомлений.
+    Ждёт появления новых уведомлений до 20 секунд, иначе возвращает 0.
+    """
+    max_wait = 20  # секунд
+    interval = 1   # как часто проверять (секунд)
+    waited = 0
+
+    initial_count = Notification.objects.filter(
+        recipient=request.user, is_read=False
+    ).count()
+
+    while waited < max_wait:
+        current_count = Notification.objects.filter(
+            recipient=request.user, is_read=False
+        ).count()
+        if current_count > initial_count:
+            return JsonResponse({
+                'success': True,
+                'unread_count': current_count,
+                'timestamp': str(datetime.now())
+            })
+        time.sleep(interval)
+        waited += interval
+
+    return JsonResponse({
+        'success': True,
+        'unread_count': current_count,
+        'timestamp': str(datetime.now())
+    })
 
 def search_snippets(request):
     form = SnippetSearchForm(request.GET)
