@@ -1,4 +1,5 @@
 import time
+from collections import defaultdict
 from datetime import datetime
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -266,27 +267,61 @@ def comment_add(request):
     return HttpResponseNotAllowed(['POST'])
 
 # Notifications
-
 @login_required
 def user_notifications(request, per_page=5):
-    notifications = Notification.objects.filter(recipient=request.user)
+    # Получаем только уведомления-комментарии с привязкой к сниппету
+    notifications = Notification.objects.filter(
+        recipient=request.user,
+        notification_type='comment',
+        snippet__isnull=False
+    ).order_by('-created_at')
 
-    paginator = Paginator(notifications, per_page)
+    # Группируем по сниппету
+    grouped = defaultdict(list)
+    for notif in notifications:
+        if notif.snippet:  # защита от пустых
+            grouped[notif.snippet].append(notif)
+
+    # Преобразуем в список для пагинации
+    grouped_list = [
+        {'snippet': snippet, 'notifications': notifs}
+        for snippet, notifs in grouped.items()
+    ]
+
+    paginator = Paginator(grouped_list, per_page)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
+    # Для бейджа новых уведомлений
+    unread_count = Notification.objects.filter(
+        recipient=request.user, is_read=False
+    ).count()
+
     context = {
         'page_obj': page_obj,
+        'unread_count': unread_count,
         'pagename': 'Мои уведомления',
     }
-
-    return render(request, 'notifications.html', context=context)
+    return render(request, 'notifications.html', context)
 
 @login_required
 def mark_notification_read(request, pk):
     notif = get_object_or_404(Notification, pk=pk, recipient=request.user)
     notif.is_read = True
     notif.save()
+    return redirect('MainApp:notifications')
+
+@login_required
+def delete_notification(request, pk):
+    notif = get_object_or_404(Notification, pk=pk, recipient=request.user)
+    if request.method == 'POST':
+        notif.delete()
+    return redirect('MainApp:notifications')
+
+@login_required
+def delete_all_read_notifications(request):
+    if request.method == 'POST':
+        Notification.objects.filter(recipient=request.user, is_read=True).delete()
     return redirect('MainApp:notifications')
 
 @login_required
@@ -321,19 +356,6 @@ def unread_notifications_longpoll(request):
         'unread_count': current_count,
         'timestamp': str(datetime.now())
     })
-
-@login_required
-def delete_notification(request, pk):
-    notif = get_object_or_404(Notification, pk=pk, recipient=request.user)
-    if request.method == 'POST':
-        notif.delete()
-    return redirect('MainApp:notifications')
-
-@login_required
-def delete_all_read_notifications(request):
-    if request.method == 'POST':
-        Notification.objects.filter(recipient=request.user, is_read=True).delete()
-    return redirect('MainApp:notifications')
 
 def search_snippets(request):
     form = SnippetSearchForm(request.GET)

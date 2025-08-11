@@ -34,7 +34,7 @@ def create_comment_notification(sender, instance, created, **kwargs):
         Notification.objects.create(
             recipient=instance.snippet.user,
             notification_type='comment',
-            title='Новый комментарий',
-            message=f"{instance.author.username} оставил комментарий: {instance.text[:50]}",
+            title='Комментарий',
+            message=f"{instance.author.username} прокомментировал ваш сниппет",
             snippet=instance.snippet,
         )
