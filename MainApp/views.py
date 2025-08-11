@@ -266,6 +266,7 @@ def comment_add(request):
     return HttpResponseNotAllowed(['POST'])
 
 # Notifications
+
 @login_required
 def user_notifications(request, per_page=5):
     notifications = Notification.objects.filter(recipient=request.user)
@@ -288,15 +289,14 @@ def mark_notification_read(request, pk):
     notif.save()
     return redirect('MainApp:notifications')
 
-
 @login_required
 def unread_notifications_longpoll(request):
     """
     Long polling endpoint для получения количества непрочитанных уведомлений.
     Ждёт появления новых уведомлений до 20 секунд, иначе возвращает 0.
     """
-    max_wait = 20  # секунд
-    interval = 1   # как часто проверять (секунд)
+    max_wait = 20
+    interval = 1
     waited = 0
 
     initial_count = Notification.objects.filter(
