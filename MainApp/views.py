@@ -8,7 +8,6 @@ from django.db.models import Avg
 from django.http import HttpResponseForbidden, HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
-
 from MainApp.models import Snippet, Tag, Comment, Notification, LikeDislike
 from MainApp.forms import SnippetForm, UserRegistrationForm, CommentForm, SnippetSearchForm
 from django.contrib import auth
@@ -23,7 +22,6 @@ def index_page(request):
     context = {'pagename': 'PythonBin'}
 
     return render(request, 'index.html', context)
-
 
 def snippets_list(request):
     pagename = 'Просмотр сниппетов'
@@ -113,6 +111,8 @@ def snippet_detail(request, id):
     for comment in comments_page:
         comment.likes_count = comment.likes.filter(vote=1).count()
         comment.dislikes_count = comment.likes.filter(vote=-1).count()
+        snippet.likes_count = snippet.likes.filter(vote=1).count()
+        snippet.dislikes_count = snippet.likes.filter(vote=-1).count()
 
     context = {
         'pagename': f'Сниппет: {snippet.name}',
@@ -183,8 +183,6 @@ def custom_login(request):
 def custom_logout(request):
     auth.logout(request)
     return redirect('MainApp:home')
-
-
 
 def custom_registration(request):
     if request.method == "GET":
@@ -279,10 +277,9 @@ def user_notifications(request, per_page=5):
 
     notifications = Notification.objects.filter(
         recipient=request.user,
-        notification_type='comment',
+        notification_type__in=['comment', 'like', 'dislike'],
         snippet__isnull=False
     ).order_by('-created_at')
-
 
     grouped = defaultdict(list)
     for notif in notifications:
@@ -388,6 +385,33 @@ def like_comment(request):
     likes = comment.likes.filter(vote=1).count()
     dislikes = comment.likes.filter(vote=-1).count()
     return JsonResponse({'likes': likes, 'dislikes': dislikes})
+
+@require_POST
+def like_snippet(request):
+    user = request.user
+    obj_id = request.POST.get('object_id')
+    vote = int(request.POST.get('vote'))
+
+    snippet = Snippet.objects.get(pk=obj_id)
+    content_type = ContentType.objects.get_for_model(Snippet)
+
+    like_obj, created = LikeDislike.objects.get_or_create(
+        user=user,
+        content_type=content_type,
+        object_id=obj_id,
+        defaults={'vote': vote}
+    )
+    if not created:
+        if like_obj.vote == vote:
+            like_obj.delete()
+        else:
+            like_obj.vote = vote
+            like_obj.save()
+
+    likes = snippet.likes.filter(vote=1).count()
+    dislikes = snippet.likes.filter(vote=-1).count()
+    return JsonResponse({'likes': likes, 'dislikes': dislikes})
+
 
 # Search
 def search_snippets(request):

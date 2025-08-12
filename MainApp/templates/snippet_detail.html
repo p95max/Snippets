@@ -57,6 +57,15 @@
             <i class="fa-solid fa-user me-1"></i>
             <span class="fw-bold">Автор:</span>
             <span>{{ snippet.user.username }}</span>
+
+            <form class="like-form" data-object-id="{{ snippet.id }}" data-url="{% url 'MainApp:like_snippet' %}">
+                {% csrf_token %}
+                <button type="button" class="btn btn-outline-success btn-sm like-btn">Нравится</button>
+                <span class="like-count">{{ snippet.likes_count }}</span>
+                <button type="button" class="btn btn-outline-danger btn-sm dislike-btn">👎</button>
+                <span class="dislike-count">{{ snippet.dislikes_count }}</span>
+            </form>
+
         </div>
 
         <!-- Комментарии -->

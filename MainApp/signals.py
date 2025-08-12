@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver, Signal
 from django.db.models import F
-from MainApp.models import Snippet, Comment, Notification
+from MainApp.models import Snippet, Comment, Notification, LikeDislike
 
 snippet_views = Signal()
 snippet_deleted = Signal()
@@ -38,3 +38,47 @@ def create_comment_notification(sender, instance, created, **kwargs):
             message=f"{instance.author.username} прокомментировал ваш сниппет",
             snippet=instance.snippet,
         )
+
+@receiver(post_save, sender=LikeDislike)
+def create_comment_like_notification(sender, instance, created, **kwargs):
+    if created and isinstance(instance.content_object, Comment):
+        comment = instance.content_object
+        if comment.author != instance.user:
+            if instance.vote == LikeDislike.LIKE:
+                Notification.objects.create(
+                    recipient=comment.author,
+                    notification_type='like',
+                    title='Ваш комментарий понравился',
+                    message=f"{instance.user.username} поставил лайк ваш комментарий к сниппету '{comment.snippet.name}'",
+                    snippet=comment.snippet,
+                )
+            elif instance.vote == LikeDislike.DISLIKE:
+                Notification.objects.create(
+                    recipient=comment.author,
+                    notification_type='dislike',
+                    title='Ваш комментарий не понравился',
+                    message=f"{instance.user.username} поставил дизлайк вашему комментарию к сниппету '{comment.snippet.name}'",
+                    snippet=comment.snippet,
+                )
+
+@receiver(post_save, sender=LikeDislike)
+def create_snippet_like_notification(sender, instance, created, **kwargs):
+    if created and isinstance(instance.content_object, Snippet):
+        snippet = instance.content_object
+        if snippet.user != instance.user:
+            if instance.vote == LikeDislike.LIKE:
+                Notification.objects.create(
+                    recipient=snippet.user,
+                    notification_type='like',
+                    title='Ваш сниппет понравился',
+                    message=f"{instance.user.username} оценил ваш сниппет '{snippet.name}'",
+                    snippet=snippet,
+                )
+            elif instance.vote == LikeDislike.DISLIKE:
+                Notification.objects.create(
+                    recipient=snippet.user,
+                    notification_type='dislike',
+                    title='Ваш сниппет не понравился',
+                    message=f"{instance.user.username} поставил дизлайк вашему сниппету '{snippet.name}'",
+                    snippet=snippet,
+                )
