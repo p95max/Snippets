@@ -3,10 +3,13 @@ from collections import defaultdict
 from datetime import datetime
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
 from django.db.models import Avg
 from django.http import HttpResponseForbidden, HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import get_object_or_404
-from MainApp.models import Snippet, Tag, Comment, Notification
+from django.views.decorators.http import require_POST
+
+from MainApp.models import Snippet, Tag, Comment, Notification, LikeDislike
 from MainApp.forms import SnippetForm, UserRegistrationForm, CommentForm, SnippetSearchForm
 from django.contrib import auth
 from django.shortcuts import render, redirect
@@ -106,6 +109,10 @@ def snippet_detail(request, id):
     if not request.session.get(viewed_key, False):
         snippet_views.send(sender=Snippet, snippet_id=snippet.id)
         request.session[viewed_key] = True
+
+    for comment in comments_page:
+        comment.likes_count = comment.likes.filter(vote=1).count()
+        comment.dislikes_count = comment.likes.filter(vote=-1).count()
 
     context = {
         'pagename': f'Сниппет: {snippet.name}',
@@ -269,20 +276,20 @@ def comment_add(request):
 # Notifications
 @login_required
 def user_notifications(request, per_page=5):
-    # Получаем только уведомления-комментарии с привязкой к сниппету
+
     notifications = Notification.objects.filter(
         recipient=request.user,
         notification_type='comment',
         snippet__isnull=False
     ).order_by('-created_at')
 
-    # Группируем по сниппету
+
     grouped = defaultdict(list)
     for notif in notifications:
-        if notif.snippet:  # защита от пустых
+        if notif.snippet:
             grouped[notif.snippet].append(notif)
 
-    # Преобразуем в список для пагинации
+
     grouped_list = [
         {'snippet': snippet, 'notifications': notifs}
         for snippet, notifs in grouped.items()
@@ -292,7 +299,7 @@ def user_notifications(request, per_page=5):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    # Для бейджа новых уведомлений
+
     unread_count = Notification.objects.filter(
         recipient=request.user, is_read=False
     ).count()
@@ -357,6 +364,32 @@ def unread_notifications_longpoll(request):
         'timestamp': str(datetime.now())
     })
 
+# Likes
+@require_POST
+def like_comment(request):
+    user = request.user
+    obj_id = request.POST.get('object_id')
+    vote = int(request.POST.get('vote'))
+
+    comment = Comment.objects.get(pk=obj_id)
+    like_obj, created = LikeDislike.objects.get_or_create(
+        user=user,
+        content_type=ContentType.objects.get_for_model(Comment),
+        object_id=obj_id,
+        defaults={'vote': vote}
+    )
+    if not created:
+        if like_obj.vote == vote:
+            like_obj.delete()
+        else:
+            like_obj.vote = vote
+            like_obj.save()
+
+    likes = comment.likes.filter(vote=1).count()
+    dislikes = comment.likes.filter(vote=-1).count()
+    return JsonResponse({'likes': likes, 'dislikes': dislikes})
+
+# Search
 def search_snippets(request):
     form = SnippetSearchForm(request.GET)
     query = ''

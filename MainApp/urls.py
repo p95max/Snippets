@@ -2,7 +2,8 @@ from django.urls import path
 from MainApp.views import (index_page, add_snippet_page, snippet_detail,
                            edit_snippet_page, delete_snippet_page, custom_login, custom_logout, snippets_list,
                            custom_registration, comment_add, search_snippets, snippets_stats, snippets_by_tag, my_snippets,
-                           user_notifications, unread_notifications_longpoll, mark_notification_read, delete_notification, delete_all_read_notifications)
+                           user_notifications, unread_notifications_longpoll, mark_notification_read, delete_notification, delete_all_read_notifications,
+                           like_comment)
 from MainApp.views_api import simple_api_view, api_test_page
 
 app_name = 'MainApp'
@@ -39,4 +40,7 @@ urlpatterns = [
     # API endpoints
     path('api/simple-data/', simple_api_view, name='simple_api'),
     path('api-test/', api_test_page, name='api_test_page'),
+
+    # Like
+    path('like-comment/', like_comment, name='like_comment'),
 ]

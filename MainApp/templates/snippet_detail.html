@@ -67,6 +67,15 @@
                     <strong>{{ comment.author.username }}</strong>
                     <small class="text-muted">{{ comment.creation_date|date:"d.m.Y H:i" }}</small>
                     <p>{{ comment.text|linebreaksbr }}</p>
+
+                    <form class="like-form" data-object-id="{{ comment.id }}" data-url="{% url 'MainApp:like_comment' %}">
+                        {% csrf_token %}
+                        <button type="button" class="btn btn-outline-success btn-sm like-btn">👍</button>
+                        <span class="like-count">{{ comment.likes_count }}</span>
+                        <button type="button" class="btn btn-outline-danger btn-sm dislike-btn">👎</button>
+                        <span class="dislike-count">{{ comment.dislikes_count }}</span>
+                    </form>
+
                 </div>
             {% empty %}
                 <p>Комментариев пока нет.</p>
