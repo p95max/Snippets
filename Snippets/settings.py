@@ -14,6 +14,8 @@ from pathlib import Path
 
 import os
 
+from django.urls import reverse_lazy
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -189,3 +191,5 @@ LOGGING = {
 SHELL_PLUS_PRE_IMPORTS = [
     ('tests.factories', ('UserFactory', 'TagFactory', 'SnippetFactory', 'CommentFactory')),
 ]
+
+LOGIN_URL = reverse_lazy('MainApp:custom_login')
