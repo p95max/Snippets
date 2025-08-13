@@ -14,7 +14,6 @@
           <strong>Общие сниппеты |</strong>
         </a>
       </li>
-
       {% if request.user.is_authenticated %}
       <li class="nav-item">
         <a class="nav-link" href="{% url 'MainApp:user-snippets' %}">
@@ -22,7 +21,6 @@
         </a>
       </li>
       {% endif %}
-
       <li class="nav-item">
         <a class="nav-link" href="{% url 'MainApp:snippets-stats' %}">
           <strong>Статистика сервиса |</strong>
@@ -34,19 +32,32 @@
 
       {% include 'includes/search_form.html' %}
 
-      <span class="navbar-text me-3" style="color:#c9d1d9;">
-        Добро пожаловать, <span style="color:#56d364;">{{ request.user.username }}</span>
-      </span>
+      <a class="btn btn-outline-warning me-2" href="{% url 'MainApp:notifications' %}">
+        🔔Уведомления
+        {% if unread_count > 0 %}
+          <span class="badge bg-danger">{{ unread_count }}</span>
+        {% endif %}
+      </a>
 
-    <a class="btn btn-outline-warning me-2" href="{% url 'MainApp:notifications' %}">
-      🔔Уведомления
-      {% if unread_count > 0 %}
-        <span class="badge bg-danger">{{ unread_count }}</span>
-      {% endif %}
-    </a>
-
-
-      <a class="btn btn-outline-light" href="{% url 'MainApp:custom_logout' %}">🚪Выйти</a>
+      <!-- User dropdown -->
+      <li class="nav-item dropdown ms-2 list-unstyled d-inline-block">
+        <a class="btn btn-outline-light dropdown-toggle" href="#" id="userDropdown" role="button"
+           data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-user"></i> {{ request.user.username }}
+        </a>
+        <div class="dropdown-menu dropdown-menu-end" style="min-width: 200px;">
+            <a class="dropdown-item" href="{% url 'MainApp:user_profile' %}">
+                <i class="fas fa-user-circle"></i> Мой профиль
+            </a>
+            <a class="dropdown-item" href="#">
+                <i class="fas fa-edit"></i> Редактировать профиль
+            </a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="{% url 'MainApp:custom_logout' %}">
+                <i class="fas fa-sign-out-alt"></i> Выйти
+            </a>
+        </div>
+      </li>
 
     {% else %}
 

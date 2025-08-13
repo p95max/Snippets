@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Профиль пользователя{% endblock %}
+
+{% block content %}
+<main role="main" class="mt-3 flex-shrink-0">
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <div class="profile-header">
+                    <div class="row align-items-center">
+                        <div class="col-md-3 text-center">
+                            <div class="profile-avatar">
+                                <img alt="Аватар" class="avatar-image" style="width: 120px; height: 120px; object-fit: cover;"
+                                src="{% if user.profile.avatar_url %}{{ user.profile.avatar_url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h1>@{{ user.username }}</h1>
+                            <p class="mb-2">Дата регистрации: {{ user.date_joined|date:"d.m.Y" }}</p>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="#" class="btn btn-outline-primary edit-profile-btn">
+                                <i class="fas fa-edit"></i> Редактировать
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <ul class="nav nav-tabs" id="profileTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button"
+                        role="tab">
+                    <i class="fas fa-user"></i> Информация
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="stats-tab" data-bs-toggle="tab" data-bs-target="#stats" type="button"
+                        role="tab">
+                    <i class="fas fa-chart-bar"></i> Статистика
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button"
+                        role="tab">
+                    <i class="fas fa-history"></i> История
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="profileTabContent">
+            <!-- Информация -->
+            <div class="tab-pane fade show active" id="info" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4>Основная информация</h4>
+                        <table class="table">
+                            <tr>
+                                <td><strong>Имя пользователя:</strong></td>
+                                <td>{{ user.username }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Имя:</strong></td>
+                                <td>{{ user.first_name|default:"Не указано" }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Фамилия:</strong></td>
+                                <td>{{ user.last_name|default:"Не указано" }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Email:</strong></td>
+                                <td>{{ user.email }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Дата регистрации:</strong></td>
+                                <td>{{ user.date_joined|date:"d.m.Y H:i" }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Последний вход:</strong></td>
+                                <td>{{ user.last_login|date:"d.m.Y H:i" }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h4>Дополнительная информация</h4>
+                        <p><strong>О себе:</strong><br>{{ user.profile.bio|default:"-" }}</p>
+                        <p><strong>Веб-сайт:</strong><br>
+                            {% if user.profile.website %}
+                                <a href="{{ user.profile.website }}" target="_blank">{{ user.profile.website }}</a>
+                            {% else %}
+                                <span>-</span>
+                            {% endif %}
+                        </p>
+                        <p><strong>Смена пароля:</strong><br>
+                            <a href="#" class="btn btn-warning btn-sm">
+                                <i class="fas fa-key"></i> Изменить пароль
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Статистика -->
+            <div class="tab-pane fade" id="stats" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4>Общая статистика</h4>
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row text-center">
+                                    <div class="col-6">
+                                        <h3 class="text-primary">{{ stats.total_snippets }}</h3>
+                                        <p>Всего сниппетов</p>
+                                    </div>
+                                    <div class="col-6">
+                                        <h3 class="text-success">{{ stats.avg_views|floatformat:0 }}</h3>
+                                        <p>Сред. просмотров</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h4>Топ сниппетов по просмотрам</h4>
+                        {% for snip in stats.top_snippets %}
+                        <div class="snippet-card">
+                            <h6><a href="{% url 'MainApp:snippet-detail' snip.id %}">{{ snip.name }}</a></h6>
+                            <p class="mb-1">
+                                <span class="badge bg-primary">{{ snip.lang }}</span>
+                                <span class="text-muted">{{ snip.creation_date|date:"d.m.Y" }}</span>
+                            </p>
+                            <p class="mb-0">
+                                <i class="fas fa-eye"></i> {{ snip.views_count }} просмотров
+                            </p>
+                        </div>
+                        {% empty %}
+                        <div class="text-muted">Нет популярных сниппетов</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- История -->
+            <div class="tab-pane fade" id="history" role="tabpanel">
+    <h4>История действий</h4>
+    {% for action in history %}
+    <div class="action-item">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <p class="mb-1">
+                    {{ action.date|date:"d.m.Y H:i" }} : {{ action.text }}
+                    <a href="{{ action.url }}"><strong>{{ action.obj_name }} </strong></a>
+                </p>
+            </div>
+            <span class="badge {{ action.badge_class }}">{{ action.badge_label }}</span>
+        </div>
+    </div>
+    {% empty %}
+    <div class="text-muted">Нет истории действий</div>
+    {% endfor %}
+</div>
+        </div>
+    </div>
+</main>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script>
+    var triggerTabList = [].slice.call(document.querySelectorAll('#profileTabs button'))
+    triggerTabList.forEach(function (triggerEl) {
+      var tabTrigger = new bootstrap.Tab(triggerEl)
+      triggerEl.addEventListener('click', function (event) {
+        event.preventDefault()
+        tabTrigger.show()
+      })
+    })
+</script>
+{% endblock %}

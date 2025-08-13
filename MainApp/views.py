@@ -209,6 +209,77 @@ def custom_registration(request):
         else:
             return render(request, "custom_auth/register.html", {"form": form})
 
+
+from django.urls import reverse
+
+@login_required
+def user_profile(request):
+    user = request.user
+
+    snippet_actions = [
+        {
+            'text': f'Создал сниппет',
+            'date': s.creation_date,
+            'badge_class': 'bg-success',
+            'badge_label': 'Сниппет',
+            'url': reverse('MainApp:snippet-detail', args=[s.id]),
+            'obj_name': s.name,
+        }
+        for s in Snippet.objects.filter(user=user)
+    ]
+
+    comment_actions = [
+        {
+            'text': f'Прокомментировал сниппет',
+            'date': c.creation_date,
+            'badge_class': 'bg-info',
+            'badge_label': 'Комментарий',
+            'url': reverse('MainApp:snippet-detail', args=[c.snippet.id]),
+            'obj_name': c.snippet.name,
+        }
+        for c in Comment.objects.filter(author=user)
+    ]
+
+    like_actions = []
+    for like in LikeDislike.objects.filter(user=user):
+        obj = like.content_object
+        if hasattr(obj, 'name'):
+            obj_type = 'Сниппет'
+            obj_name = obj.name
+            url = reverse('MainApp:snippet-detail', args=[obj.id])
+        elif hasattr(obj, 'snippet'):
+            obj_type = 'Комментарий'
+            obj_name = obj.snippet.name
+            url = reverse('MainApp:snippet-detail', args=[obj.snippet.id])
+        else:
+            continue
+
+        action = {
+            'text': f'{"Поставил лайк" if like.vote == 1 else "Поставил дизлайк"} к {obj_type.lower()}',
+            'date': like.created_at,
+            'badge_class': 'bg-warning' if like.vote == 1 else 'bg-danger',
+            'badge_label': 'Лайк' if like.vote == 1 else 'Дизлайк',
+            'url': url,
+            'obj_name': obj_name,
+        }
+        like_actions.append(action)
+
+    history = snippet_actions + comment_actions + like_actions
+    history.sort(key=lambda x: x['date'], reverse=True)
+
+    user_snippets = Snippet.objects.filter(user=user)
+    stats = {
+        'total_snippets': user_snippets.count(),
+        'avg_views': user_snippets.aggregate(avg=Avg('views_count'))['avg'] or 0,
+        'top_snippets': user_snippets.order_by('-views_count')[:5],
+    }
+
+    return render(request, 'profile.html', {
+        'user': user,
+        'history': history,
+        'stats': stats,
+    })
+
 #CRUD
 @login_required
 def add_snippet_page(request):
@@ -467,6 +538,8 @@ def search_snippets(request):
     }
 
     return render(request, 'search_results.html', context=context)
+
+
 
 
 
