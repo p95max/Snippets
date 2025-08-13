@@ -21,7 +21,7 @@
                             <p class="mb-2">Дата регистрации: {{ user.date_joined|date:"d.m.Y" }}</p>
                         </div>
                         <div class="col-md-3">
-                            <a href="#" class="btn btn-outline-primary edit-profile-btn">
+                            <a href="{% url 'MainApp:edit_profile' %}" class="btn btn-outline-primary edit-profile-btn">
                                 <i class="fas fa-edit"></i> Редактировать
                             </a>
                         </div>
@@ -46,7 +46,7 @@
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button"
                         role="tab">
-                    <i class="fas fa-history"></i> История
+                    <i class="fas fa-history"></i> Активность
                 </button>
             </li>
         </ul>
@@ -145,23 +145,22 @@
 
             <!-- История -->
             <div class="tab-pane fade" id="history" role="tabpanel">
-    <h4>История действий</h4>
-    {% for action in history %}
-    <div class="action-item">
-        <div class="d-flex justify-content-between align-items-start">
-            <div>
-                <p class="mb-1">
-                    {{ action.date|date:"d.m.Y H:i" }} : {{ action.text }}
-                    <a href="{{ action.url }}"><strong>{{ action.obj_name }} </strong></a>
-                </p>
+                {% for action in history %}
+                <div class="action-item">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="mb-1">
+                                {{ action.date|date:"d.m.Y H:i" }} - {{ action.text }}
+                                <a href="{{ action.url }}"><strong>{{ action.obj_name }} </strong></a>
+                            </p>
+                        </div>
+                        <span class="badge {{ action.badge_class }}">{{ action.badge_label }}</span>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-muted">Нет истории действий</div>
+                {% endfor %}
             </div>
-            <span class="badge {{ action.badge_class }}">{{ action.badge_label }}</span>
-        </div>
-    </div>
-    {% empty %}
-    <div class="text-muted">Нет истории действий</div>
-    {% endfor %}
-</div>
         </div>
     </div>
 </main>

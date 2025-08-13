@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver, Signal
 from django.db.models import F
-from MainApp.models import Snippet, Comment, Notification, LikeDislike
+from MainApp.models import Snippet, Comment, Notification, LikeDislike, UserProfile
 
 snippet_views = Signal()
 snippet_deleted = Signal()
@@ -82,3 +82,8 @@ def create_snippet_like_notification(sender, instance, created, **kwargs):
                     message=f"{instance.user.username} поставил дизлайк вашему сниппету '{snippet.name}'",
                     snippet=snippet,
                 )
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(user=instance)

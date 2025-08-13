@@ -7,9 +7,10 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models import Avg
 from django.http import HttpResponseForbidden, HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import get_object_or_404
+from django.urls import reverse
 from django.views.decorators.http import require_POST
 from MainApp.models import Snippet, Tag, Comment, Notification, LikeDislike
-from MainApp.forms import SnippetForm, UserRegistrationForm, CommentForm, SnippetSearchForm
+from MainApp.forms import SnippetForm, UserRegistrationForm, CommentForm, SnippetSearchForm, UserForm, UserProfileForm
 from django.contrib import auth
 from django.shortcuts import render, redirect
 from django.db.models import Q, Count
@@ -210,12 +211,9 @@ def custom_registration(request):
             return render(request, "custom_auth/register.html", {"form": form})
 
 
-from django.urls import reverse
-
 @login_required
 def user_profile(request):
     user = request.user
-
     snippet_actions = [
         {
             'text': f'Создал сниппет',
@@ -274,11 +272,36 @@ def user_profile(request):
         'top_snippets': user_snippets.order_by('-views_count')[:5],
     }
 
-    return render(request, 'profile.html', {
+    context = {
         'user': user,
         'history': history,
         'stats': stats,
+    }
+
+    return render(request, 'profile.html', context=context)
+
+@login_required
+def edit_profile(request):
+    user = request.user
+    profile = user.profile
+
+    if request.method == 'POST':
+        user_form = UserForm(request.POST, instance=user)
+        profile_form = UserProfileForm(request.POST, request.FILES, instance=profile)
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            return redirect('MainApp:user_profile')
+    else:
+        user_form = UserForm(instance=user)
+        profile_form = UserProfileForm(instance=profile)
+
+    return render(request, 'edit_profile.html', {
+        'user_form': user_form,
+        'profile_form': profile_form,
     })
+
+
 
 #CRUD
 @login_required

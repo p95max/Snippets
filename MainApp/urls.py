@@ -3,7 +3,7 @@ from MainApp.views import (index_page, add_snippet_page, snippet_detail,
                            edit_snippet_page, delete_snippet_page, custom_login, custom_logout, snippets_list,
                            custom_registration, comment_add, search_snippets, snippets_stats, snippets_by_tag, my_snippets,
                            user_notifications, unread_notifications_longpoll, mark_notification_read, delete_notification, delete_all_read_notifications,
-                           like_comment, like_snippet, user_profile)
+                           like_comment, like_snippet, user_profile, edit_profile)
 from MainApp.views_api import simple_api_view, api_test_page
 
 app_name = 'MainApp'
@@ -22,6 +22,7 @@ urlpatterns = [
     path('logout/', custom_logout, name='custom_logout'),
     path('regist/', custom_registration, name='custom_regist'),
     path('profile/', user_profile, name='user_profile'),
+    path('edit_profile/', edit_profile, name='edit_profile'),
 
     #CRUD
     path('snippets/add', add_snippet_page, name="snippet-add"),

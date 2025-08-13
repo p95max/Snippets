@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from MainApp.models import Snippet, LANG_CHOICES, Comment
+from MainApp.models import Snippet, LANG_CHOICES, Comment, UserProfile
 
 
 class SnippetForm(forms.ModelForm):
@@ -87,3 +87,20 @@ class SnippetSearchForm(forms.Form):
         required=False,
         widget=forms.TextInput(attrs={'placeholder': 'Поиск по названию, коду или языку...'})
     )
+
+
+
+class UserForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email']
+
+
+
+class UserProfileForm(forms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = ['avatar', 'bio', 'website']
+        help_texts = {
+            'website': 'Введите полный адрес, например: https://example.com',
+        }
