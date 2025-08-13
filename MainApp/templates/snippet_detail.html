@@ -58,13 +58,13 @@
             <span class="fw-bold">Автор:</span>
             <span>{{ snippet.user.username }}</span>
 
-            <form class="like-form" data-object-id="{{ snippet.id }}" data-url="{% url 'MainApp:like_snippet' %}">
-                {% csrf_token %}
-                <button type="button" class="btn btn-outline-success btn-sm like-btn">Нравится</button>
-                <span class="like-count">{{ snippet.likes_count }}</span>
-                <button type="button" class="btn btn-outline-danger btn-sm dislike-btn">👎</button>
-                <span class="dislike-count">{{ snippet.dislikes_count }}</span>
-            </form>
+<form class="like-form" data-object-id="{{ snippet.id }}" data-url="{% url 'MainApp:like_snippet' %}">
+    {% csrf_token %}
+    <button type="button" class="btn btn-outline-success btn-sm like-btn {% if snippet.user_like == 1 %}active{% endif %}">👍</button>
+    <span class="like-count">{{ snippet.likes_count }}</span>
+    <button type="button" class="btn btn-outline-danger btn-sm dislike-btn {% if snippet.user_like == -1 %}active{% endif %}">👎</button>
+    <span class="dislike-count">{{ snippet.dislikes_count }}</span>
+</form>
 
         </div>
 
@@ -78,12 +78,12 @@
                     <p>{{ comment.text|linebreaksbr }}</p>
 
                     <form class="like-form" data-object-id="{{ comment.id }}" data-url="{% url 'MainApp:like_comment' %}">
-                        {% csrf_token %}
-                        <button type="button" class="btn btn-outline-success btn-sm like-btn">👍</button>
-                        <span class="like-count">{{ comment.likes_count }}</span>
-                        <button type="button" class="btn btn-outline-danger btn-sm dislike-btn">👎</button>
-                        <span class="dislike-count">{{ comment.dislikes_count }}</span>
-                    </form>
+    {% csrf_token %}
+    <button type="button" class="btn btn-outline-success btn-sm like-btn {% if comment.user_like == 1 %}active{% endif %}">👍</button>
+    <span class="like-count">{{ comment.likes_count }}</span>
+    <button type="button" class="btn btn-outline-danger btn-sm dislike-btn {% if comment.user_like == -1 %}active{% endif %}">👎</button>
+    <span class="dislike-count">{{ comment.dislikes_count }}</span>
+</form>
 
                 </div>
             {% empty %}

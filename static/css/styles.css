@@ -61,4 +61,22 @@ footer {
   opacity: 0;
 }
 
+.btn.active,
+.btn:active {
+    box-shadow: 0 0 0 0.2rem rgba(40,167,69,.25);
+    border-width: 2px;
+    font-weight: bold;
+    opacity: 1;
+}
+.btn-outline-success.active {
+    background-color: #198754;
+    color: #fff;
+    border-color: #198754;
+}
+.btn-outline-danger.active {
+    background-color: #dc3545;
+    color: #fff;
+    border-color: #dc3545;
+}
+
 

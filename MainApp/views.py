@@ -98,21 +98,32 @@ def snippet_detail(request, id):
     viewed_key = f'snippet_{id}'
     comment_form = CommentForm()
 
-    # Пагинация
     comments = Comment.objects.filter(snippet=snippet).order_by('-creation_date')
     paginator = Paginator(comments, 5)
     page_number = request.GET.get('page')
     comments_page = paginator.get_page(page_number)
-    # Счётчик количества просмотров через сигналы
+
     if not request.session.get(viewed_key, False):
         snippet_views.send(sender=Snippet, snippet_id=snippet.id)
         request.session[viewed_key] = True
 
+    snippet.likes_count = snippet.likes.filter(vote=1).count()
+    snippet.dislikes_count = snippet.likes.filter(vote=-1).count()
+    snippet.user_like = None
+    if request.user.is_authenticated:
+        user_like_obj = snippet.likes.filter(user=request.user).first()
+        if user_like_obj:
+            snippet.user_like = user_like_obj.vote
+
+
     for comment in comments_page:
         comment.likes_count = comment.likes.filter(vote=1).count()
         comment.dislikes_count = comment.likes.filter(vote=-1).count()
-        snippet.likes_count = snippet.likes.filter(vote=1).count()
-        snippet.dislikes_count = snippet.likes.filter(vote=-1).count()
+        comment.user_like = None
+        if request.user.is_authenticated:
+            user_like_obj = comment.likes.filter(user=request.user).first()
+            if user_like_obj:
+                comment.user_like = user_like_obj.vote
 
     context = {
         'pagename': f'Сниппет: {snippet.name}',
@@ -384,7 +395,13 @@ def like_comment(request):
 
     likes = comment.likes.filter(vote=1).count()
     dislikes = comment.likes.filter(vote=-1).count()
-    return JsonResponse({'likes': likes, 'dislikes': dislikes})
+    return JsonResponse(
+        {
+        'likes': likes,
+        'dislikes': dislikes,
+        'user_vote': vote if created or like_obj.vote == vote else 0
+    }
+    )
 
 @require_POST
 def like_snippet(request):
@@ -410,7 +427,13 @@ def like_snippet(request):
 
     likes = snippet.likes.filter(vote=1).count()
     dislikes = snippet.likes.filter(vote=-1).count()
-    return JsonResponse({'likes': likes, 'dislikes': dislikes})
+    return JsonResponse(
+        {
+        'likes': likes,
+        'dislikes': dislikes,
+        'user_vote': vote if created or like_obj.vote == vote else 0
+    }
+    )
 
 
 # Search
