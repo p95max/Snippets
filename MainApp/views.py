@@ -2,6 +2,7 @@ import time
 from collections import defaultdict
 from datetime import datetime
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Avg
@@ -10,13 +11,14 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 from MainApp.models import Snippet, Tag, Comment, Notification, LikeDislike
-from MainApp.forms import SnippetForm, UserRegistrationForm, CommentForm, SnippetSearchForm, UserForm, UserProfileForm
+from MainApp.forms import SnippetForm, UserRegistrationForm, CommentForm, SnippetSearchForm, UserForm, UserProfileForm, SetPassword
 from django.contrib import auth
 from django.shortcuts import render, redirect
 from django.db.models import Q, Count
 from django.core.paginator import Paginator
 from MainApp.signals import snippet_views, snippet_deleted
 from django.contrib import messages
+from django.contrib.auth import update_session_auth_hash
 
 
 def index_page(request):
@@ -212,11 +214,17 @@ def custom_registration(request):
 
 
 @login_required
-def user_profile(request):
-    user = request.user
+def user_profile(request, user_id=None):
+    if user_id is None or int(user_id) == request.user.id:
+        user = request.user
+        is_owner = True
+    else:
+        user = get_object_or_404(User, id=user_id)
+        is_owner = False
+
     snippet_actions = [
         {
-            'text': f'Создал сниппет',
+            'text': 'Создал сниппет',
             'date': s.creation_date,
             'badge_class': 'bg-success',
             'badge_label': 'Сниппет',
@@ -228,7 +236,7 @@ def user_profile(request):
 
     comment_actions = [
         {
-            'text': f'Прокомментировал сниппет',
+            'text': 'Прокомментировал сниппет',
             'date': c.creation_date,
             'badge_class': 'bg-info',
             'badge_label': 'Комментарий',
@@ -259,6 +267,7 @@ def user_profile(request):
             'badge_label': 'Лайк' if like.vote == 1 else 'Дизлайк',
             'url': url,
             'obj_name': obj_name,
+            'actor_name': like.user.username,
         }
         like_actions.append(action)
 
@@ -272,10 +281,16 @@ def user_profile(request):
         'top_snippets': user_snippets.order_by('-views_count')[:5],
     }
 
+    notifications = Notification.objects.filter(
+        recipient=user
+    ).order_by('-created_at')[:20]
+
     context = {
         'user': user,
         'history': history,
         'stats': stats,
+        'is_owner': is_owner,
+        'notifications': notifications,
     }
 
     return render(request, 'profile.html', context=context)
@@ -291,6 +306,7 @@ def edit_profile(request):
         if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
             profile_form.save()
+            messages.success(request, 'Изменения успешно сохранены!')
             return redirect('MainApp:user_profile')
     else:
         user_form = UserForm(instance=user)
@@ -300,6 +316,21 @@ def edit_profile(request):
         'user_form': user_form,
         'profile_form': profile_form,
     })
+
+@login_required
+def set_new_userpassword(request):
+    if request.method == 'POST':
+        form = SetPassword(request.POST)
+        if form.is_valid():
+            new_password = form.cleaned_data['new_password1']
+            request.user.set_password(new_password)
+            request.user.save()
+            update_session_auth_hash(request, request.user)
+            messages.warning(request, 'Пароль успешно изменён')
+            return redirect('MainApp:user_profile')
+    else:
+        form = SetPassword()
+    return render(request, 'set_new_pass.html', {'form': form})
 
 
 
@@ -414,23 +445,32 @@ def user_notifications(request, per_page=5):
     return render(request, 'notifications.html', context)
 
 @login_required
-def mark_notification_read(request, pk):
-    notif = get_object_or_404(Notification, pk=pk, recipient=request.user)
+def mark_notification_read(request, notif_id):
+    notif = get_object_or_404(Notification, id=notif_id, recipient=request.user)
     notif.is_read = True
     notif.save()
+    next_url = request.POST.get('next') or request.GET.get('next')
+    if next_url:
+        return redirect(next_url)
     return redirect('MainApp:notifications')
 
 @login_required
-def delete_notification(request, pk):
-    notif = get_object_or_404(Notification, pk=pk, recipient=request.user)
+def delete_notification(request, notif_id):
+    notif = get_object_or_404(Notification, id=notif_id, recipient=request.user)
     if request.method == 'POST':
         notif.delete()
+        next_url = request.POST.get('next') or request.META.get('HTTP_REFERER')
+        if next_url:
+            return redirect(next_url)
     return redirect('MainApp:notifications')
 
 @login_required
 def delete_all_read_notifications(request):
     if request.method == 'POST':
         Notification.objects.filter(recipient=request.user, is_read=True).delete()
+        next_url = request.POST.get('next') or request.META.get('HTTP_REFERER')
+        if next_url:
+            return redirect(next_url)
     return redirect('MainApp:notifications')
 
 @login_required

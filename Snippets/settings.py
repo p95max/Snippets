@@ -158,3 +158,6 @@ SHELL_PLUS_PRE_IMPORTS = [
 ]
 
 LOGIN_URL = reverse_lazy('MainApp:custom_login')
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

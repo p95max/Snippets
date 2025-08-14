@@ -104,3 +104,25 @@ class UserProfileForm(forms.ModelForm):
         help_texts = {
             'website': 'Введите полный адрес, например: https://example.com',
         }
+
+
+
+class SetPassword(forms.Form):
+    new_password1 = forms.CharField(
+        label='Новый пароль',
+        widget=forms.PasswordInput,
+        strip=False,
+    )
+    new_password2 = forms.CharField(
+        label='Повторите пароль',
+        widget=forms.PasswordInput,
+        strip=False,
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        p1 = cleaned_data.get("new_password1")
+        p2 = cleaned_data.get("new_password2")
+        if p1 and p2 and p1 != p2:
+            raise forms.ValidationError("Пароли не совпадают.")
+        return cleaned_data

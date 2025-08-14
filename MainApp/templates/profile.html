@@ -13,7 +13,7 @@
                         <div class="col-md-3 text-center">
                             <div class="profile-avatar">
                                 <img alt="Аватар" class="avatar-image" style="width: 120px; height: 120px; object-fit: cover;"
-                                src="{% if user.profile.avatar_url %}{{ user.profile.avatar_url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}">
+                                src="{% if user.profile.avatar %}{{ user.profile.avatar.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}">
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -21,9 +21,11 @@
                             <p class="mb-2">Дата регистрации: {{ user.date_joined|date:"d.m.Y" }}</p>
                         </div>
                         <div class="col-md-3">
+                            {% if is_owner %}
                             <a href="{% url 'MainApp:edit_profile' %}" class="btn btn-outline-primary edit-profile-btn">
                                 <i class="fas fa-edit"></i> Редактировать
                             </a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -43,12 +45,22 @@
                     <i class="fas fa-chart-bar"></i> Статистика
                 </button>
             </li>
+            {% if is_owner %}
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button"
                         role="tab">
                     <i class="fas fa-history"></i> Активность
                 </button>
             </li>
+            {% endif %}
+            {% if is_owner %}
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="notifications-tab" data-bs-toggle="tab" data-bs-target="#notification" type="button"
+                        role="tab">
+                    <i class="fas fa-bell"></i> Уведомления
+                </button>
+            </li>
+            {% endif %}
         </ul>
 
         <div class="tab-content" id="profileTabContent">
@@ -72,7 +84,13 @@
                             </tr>
                             <tr>
                                 <td><strong>Email:</strong></td>
-                                <td>{{ user.email }}</td>
+                                <td>
+                                    {% if is_owner %}
+                                        {{ user.email }}
+                                    {% else %}
+                                        <span class="text-muted">скрыт</span>
+                                    {% endif %}
+                                </td>
                             </tr>
                             <tr>
                                 <td><strong>Дата регистрации:</strong></td>
@@ -94,11 +112,13 @@
                                 <span>-</span>
                             {% endif %}
                         </p>
+                        {% if is_owner %}
                         <p><strong>Смена пароля:</strong><br>
-                            <a href="#" class="btn btn-warning btn-sm">
+                            <a href="{% url 'MainApp:set_new_pass' %}" class="btn btn-warning btn-sm">
                                 <i class="fas fa-key"></i> Изменить пароль
                             </a>
                         </p>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -143,6 +163,7 @@
                 </div>
             </div>
 
+            {% if is_owner %}
             <!-- История -->
             <div class="tab-pane fade" id="history" role="tabpanel">
                 {% for action in history %}
@@ -161,7 +182,67 @@
                 <div class="text-muted">Нет истории действий</div>
                 {% endfor %}
             </div>
+            {% endif %}
+            </div>
+            {% if is_owner %}
+            <!-- Уведомления -->
+            <div class="tab-pane fade" id="notification" role="tabpanel">
+    {% for notif in notifications %}
+    <div class="card border mb-3 shadow-sm">
+        <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+                <h6 class="mb-1 d-inline">
+                    {% if notif.notification_type == 'like' %}
+                        <span class="text-success">👍</span>
+                    {% elif notif.notification_type == 'comment' %}
+                        <span class="text-primary">💬</span>
+                    {% elif notif.notification_type == 'follow' %}
+                        <span class="text-info">➕</span>
+                    {% else %}
+                        <span class="text-secondary">🔔</span>
+                    {% endif %}
+                    {{ notif.created_at|date:"d.m.Y H:i" }} — {{ notif.title }}
+                    {% if notif.snippet %}
+                        <a href="{% url 'MainApp:snippet-detail' notif.snippet.id %}">
+                            <strong>{{ notif.snippet.name }}</strong>
+                        </a>
+                    {% endif %}
+                </h6>
+                <div class="text-muted small">{{ notif.message }}</div>
+            </div>
+            <div class="d-flex align-items-center gap-2 ms-auto">
+                {% if not notif.is_read %}
+                    <form method="post" action="{% url 'MainApp:mark_notification_read' notif.id %}" style="display:inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                        <button type="submit" class="btn btn-sm btn-outline-success ms-2">Прочитано</button>
+                    </form>
+                {% endif %}
+                <form method="post" action="{% url 'MainApp:delete_notification' notif.id %}" style="display:inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    <button type="submit" class="btn btn-sm btn-outline-danger ms-2" title="Удалить">🗑️</button>
+                </form>
+            </div>
         </div>
+    </div>
+    {% empty %}
+    <div class="alert alert-info text-center">Нет уведомлений</div>
+    {% endfor %}
+
+            <form method="post" action="{% url 'MainApp:delete_all_read_notifications' %}" class="mt-4 text-end">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <button type="submit" class="btn btn-danger">
+                    🗑️ Очистить прочитанные уведомления
+                </button>
+            </form>
+</div>
+            {% endif %}
+            </div>
+
+
+
     </div>
 </main>
 {% endblock %}

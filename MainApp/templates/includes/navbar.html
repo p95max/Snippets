@@ -33,7 +33,7 @@
       {% include 'includes/search_form.html' %}
 
       <a class="btn btn-outline-warning me-2" href="{% url 'MainApp:notifications' %}">
-        🔔Уведомления
+        🔔
         {% if unread_count > 0 %}
           <span class="badge bg-danger">{{ unread_count }}</span>
         {% endif %}

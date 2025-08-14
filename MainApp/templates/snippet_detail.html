@@ -55,8 +55,9 @@
     <div class="row mt-4">
         <div class="mt-2" style="text-align: left">
             <i class="fa-solid fa-user me-1"></i>
-            <span class="fw-bold">Автор:</span>
-            <span>{{ snippet.user.username }}</span>
+
+                <span class="fw-bold">Автор:</span>
+                <a href="{% url 'MainApp:user_profile_other' snippet.user.id %}">{{ snippet.user.username }}</a>
 
                 <form class="like-form" data-object-id="{{ snippet.id }}" data-url="{% url 'MainApp:like_snippet' %}">
                     {% csrf_token %}
@@ -73,7 +74,7 @@
             <h5>Комментарии ({{ comments_page.paginator.count }})</h5>
             {% for comment in comments_page %}
                 <div class="border rounded p-2 mb-2">
-                    <strong>{{ comment.author.username }}</strong>
+                    <a href="{% url 'MainApp:user_profile_other' comment.author.id %}"><strong>{{ comment.author.username }}</strong></a>
                     <small class="text-muted">{{ comment.creation_date|date:"d.m.Y H:i" }}</small>
                     <p>{{ comment.text|linebreaksbr }}</p>
 
