@@ -42,7 +42,6 @@ def snippets_list(request):
     if search:
         qs = qs.filter(Q(name__icontains=search) | Q(code__icontains=search))
 
-    # Показываем только публичные или свои сниппеты
     if request.user.is_authenticated:
         qs = qs.filter(Q(public=True) | Q(user=request.user))
     else:
@@ -55,11 +54,10 @@ def snippets_list(request):
     else:
         sort_field = sort
     if sort_field not in allowed_fields:
-        sort = '-creation_date'  # сортировка по умолчанию
+        sort = '-creation_date'
 
     qs = qs.order_by(sort)
 
-    # Пагинация
     paginator = Paginator(qs, 5)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)

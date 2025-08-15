@@ -57,7 +57,7 @@
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="notifications-tab" data-bs-toggle="tab" data-bs-target="#notification" type="button"
                         role="tab">
-                    <i class="fas fa-bell"></i> Уведомления
+                    <i class="fas fa-bell"></i> Мои уведомления
                 </button>
             </li>
             {% endif %}
@@ -201,7 +201,7 @@
                     {% else %}
                         <span class="text-secondary">🔔</span>
                     {% endif %}
-                    {{ notif.created_at|date:"d.m.Y H:i" }} — {{ notif.title }}
+                    {{ notif.created_at|date:"d.m.Y H:i" }} - {{ notif.title }}
                     {% if notif.snippet %}
                         <a href="{% url 'MainApp:snippet-detail' notif.snippet.id %}">
                             <strong>{{ notif.snippet.name }}</strong>
