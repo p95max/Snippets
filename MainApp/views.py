@@ -92,7 +92,6 @@ def my_snippets(request, per_page = 5):
     }
     return render(request, 'user_snippets.html', context)
 
-
 def snippet_detail(request, id):
     snippet = Snippet.objects.annotate(num_comments=Count('comments')).select_related('user').get(id=id)
     viewed_key = f'snippet_{id}'
@@ -171,7 +170,6 @@ def snippets_stats(request):
 
     return render(request, 'snippets_stats.html', context=context)
 
-
 # Custom auth
 def custom_login(request):
     if request.method == 'POST':
@@ -218,6 +216,9 @@ def user_profile(request, user_id=None):
         user = get_object_or_404(User, id=user_id)
         is_owner = False
 
+    user_snippets = Snippet.objects.filter(user=user).select_related('user').prefetch_related('tags')
+    user_comments = Comment.objects.filter(author=user).select_related('snippet')
+
     snippet_actions = [
         {
             'text': 'Создал сниппет',
@@ -227,7 +228,7 @@ def user_profile(request, user_id=None):
             'url': reverse('MainApp:snippet-detail', args=[s.id]),
             'obj_name': s.name,
         }
-        for s in Snippet.objects.filter(user=user)
+        for s in user_snippets
     ]
 
     comment_actions = [
@@ -239,7 +240,7 @@ def user_profile(request, user_id=None):
             'url': reverse('MainApp:snippet-detail', args=[c.snippet.id]),
             'obj_name': c.snippet.name,
         }
-        for c in Comment.objects.filter(author=user)
+        for c in user_comments
     ]
 
     like_actions = []
@@ -270,11 +271,10 @@ def user_profile(request, user_id=None):
     history = snippet_actions + comment_actions + like_actions
     history.sort(key=lambda x: x['date'], reverse=True)
 
-    user_snippets = Snippet.objects.filter(user=user).select_related('user').prefetch_related('tags')
     stats = {
         'total_snippets': user_snippets.count(),
         'avg_views': user_snippets.aggregate(avg=Avg('views_count'))['avg'] or 0,
-        'top_snippets': user_snippets.order_by('-views_count')[:5],
+        'top_snippets': user_snippets.order_by('-views_count').select_related('user')[:5],
     }
 
     notifications = Notification.objects.filter(recipient=user).select_related('snippet').order_by('-created_at')[:20]
@@ -403,29 +403,16 @@ def comment_add(request):
 
 # Notifications
 @login_required
-def user_notifications(request, per_page=5):
-
+def user_notifications(request, per_page=10):
     notifications = Notification.objects.filter(
         recipient=request.user,
         notification_type__in=['comment', 'like', 'dislike'],
         snippet__isnull=False
-    ).order_by('-created_at')
+    ).select_related('snippet', 'snippet__user').order_by('-created_at')
 
-    grouped = defaultdict(list)
-    for notif in notifications:
-        if notif.snippet:
-            grouped[notif.snippet].append(notif)
-
-
-    grouped_list = [
-        {'snippet': snippet, 'notifications': notifs}
-        for snippet, notifs in grouped.items()
-    ]
-
-    paginator = Paginator(grouped_list, per_page)
+    paginator = Paginator(notifications, per_page)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-
 
     unread_count = Notification.objects.filter(
         recipient=request.user, is_read=False
@@ -433,6 +420,7 @@ def user_notifications(request, per_page=5):
 
     context = {
         'page_obj': page_obj,
+        'notifications': page_obj,
         'unread_count': unread_count,
         'pagename': 'Мои уведомления',
     }
