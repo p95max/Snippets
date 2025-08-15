@@ -206,6 +206,9 @@
                         <a href="{% url 'MainApp:snippet-detail' notif.snippet.id %}">
                             <strong>{{ notif.snippet.name }}</strong>
                         </a>
+                        <span class="text-muted small ms-2">
+                            Автор: {{ notif.snippet.user.username }}
+                        </span>
                     {% endif %}
                 </h6>
                 <div class="text-muted small">{{ notif.message }}</div>
@@ -226,9 +229,9 @@
             </div>
         </div>
     </div>
-    {% empty %}
+{% empty %}
     <div class="alert alert-info text-center">Нет уведомлений</div>
-    {% endfor %}
+{% endfor %}
 
             <form method="post" action="{% url 'MainApp:delete_all_read_notifications' %}" class="mt-4 text-end">
                 {% csrf_token %}
