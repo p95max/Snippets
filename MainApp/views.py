@@ -206,7 +206,6 @@ def custom_registration(request):
         else:
             return render(request, "custom_auth/register.html", {"form": form})
 
-
 @login_required
 def user_profile(request, user_id=None):
     if user_id is None or int(user_id) == request.user.id:
@@ -258,12 +257,15 @@ def user_profile(request, user_id=None):
     for like in like_qs:
         content_type_to_ids[like.content_type_id].add(like.object_id)
 
-    # Получаем все объекты одним запросом для каждого типа
     id_to_obj = {}
     for ct_id, ids in content_type_to_ids.items():
         ct = ContentType.objects.get_for_id(ct_id)
         model = ct.model_class()
-        objs = model.objects.filter(id__in=ids)
+        # Если это Comment, делаем select_related('snippet')
+        if model.__name__ == 'Comment':
+            objs = model.objects.filter(id__in=ids).select_related('snippet')
+        else:
+            objs = model.objects.filter(id__in=ids)
         for obj in objs:
             id_to_obj[(ct_id, obj.id)] = obj
 
@@ -293,6 +295,7 @@ def user_profile(request, user_id=None):
             'actor_name': like.user.username,
         }
         like_actions.append(action)
+
 
     history = snippet_actions + comment_actions + like_actions
     history.sort(key=lambda x: x['date'], reverse=True)
