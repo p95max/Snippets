@@ -258,6 +258,7 @@ def user_profile(request, user_id=None):
     for like in like_qs:
         content_type_to_ids[like.content_type_id].add(like.object_id)
 
+    # Получаем все объекты одним запросом для каждого типа
     id_to_obj = {}
     for ct_id, ids in content_type_to_ids.items():
         ct = ContentType.objects.get_for_id(ct_id)
