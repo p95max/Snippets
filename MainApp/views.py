@@ -216,7 +216,6 @@ def user_profile(request, user_id=None):
         user = get_object_or_404(User, id=user_id)
         is_owner = False
 
-    # Сниппеты пользователя + теги
     user_snippets = (
         Snippet.objects
         .filter(user=user)
@@ -224,14 +223,12 @@ def user_profile(request, user_id=None):
         .prefetch_related('tags')
     )
 
-    # Комментарии пользователя + сниппеты
     user_comments = (
         Comment.objects
         .filter(author=user)
-        .select_related('snippet')
+        .select_related('snippet', 'snippet__user')
     )
 
-    # История действий
     snippet_actions = [
         {
             'text': 'Создал сниппет',
@@ -256,10 +253,24 @@ def user_profile(request, user_id=None):
         for c in user_comments
     ]
 
-    # Лайки/дизлайки (GenericForeignKey — тут оптимизация сложнее)
+    like_qs = LikeDislike.objects.filter(user=user).select_related('user', 'content_type')
+    content_type_to_ids = defaultdict(set)
+    for like in like_qs:
+        content_type_to_ids[like.content_type_id].add(like.object_id)
+
+    id_to_obj = {}
+    for ct_id, ids in content_type_to_ids.items():
+        ct = ContentType.objects.get_for_id(ct_id)
+        model = ct.model_class()
+        objs = model.objects.filter(id__in=ids)
+        for obj in objs:
+            id_to_obj[(ct_id, obj.id)] = obj
+
     like_actions = []
-    for like in LikeDislike.objects.filter(user=user).select_related('user'):
-        obj = like.content_object
+    for like in like_qs:
+        obj = id_to_obj.get((like.content_type_id, like.object_id))
+        if not obj:
+            continue
         if hasattr(obj, 'name'):
             obj_type = 'Сниппет'
             obj_name = obj.name
@@ -291,7 +302,6 @@ def user_profile(request, user_id=None):
         'top_snippets': user_snippets.order_by('-views_count').select_related('user')[:5],
     }
 
-    # ОПТИМИЗАЦИЯ: select_related по snippet и user
     notifications = (
         Notification.objects
         .filter(recipient=user)
