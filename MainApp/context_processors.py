@@ -7,7 +7,11 @@ def search_form(request):
 
 def unread_notifications_count(request):
     if request.user.is_authenticated:
-        from MainApp.models import Notification
-        count = Notification.objects.filter(recipient=request.user, is_read=False).count()
+        count = Notification.objects.filter(
+            recipient=request.user,
+            notification_type__in=['comment', 'like', 'dislike'],
+            snippet__isnull=False,
+            is_read=False
+        ).count()
         return {'unread_count': count}
     return {'unread_count': 0}

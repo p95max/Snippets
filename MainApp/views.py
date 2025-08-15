@@ -415,7 +415,10 @@ def user_notifications(request, per_page=10):
     page_obj = paginator.get_page(page_number)
 
     unread_count = Notification.objects.filter(
-        recipient=request.user, is_read=False
+        recipient=request.user,
+        notification_type__in=['comment', 'like', 'dislike'],
+        snippet__isnull=False,
+        is_read=False
     ).count()
 
     context = {
