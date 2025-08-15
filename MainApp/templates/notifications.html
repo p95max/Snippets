@@ -16,85 +16,15 @@
                     {% endif %}
                 </h2>
                 <div class="row">
-                    {% if page_obj %}
-                        {% for group in page_obj %}
-                            <div class="col-12 mb-3">
-                                <div class="card border {% if group.notifications|length > 0 and not group.notifications.0.is_read %}border-3 border-warning bg-light shadow-sm{% else %}border-info shadow-sm{% endif %}">
-                                    <div class="card-header">
-                                        <b>Сниппет:</b>
-                                        <a href="{% url 'MainApp:snippet-detail' group.snippet.id %}">
-                                            {{ group.snippet.name }}
-                                        </a>
-                                    </div>
-                                    <ul class="list-group list-group-flush">
-                                        {% for n in group.notifications %}
-                                        <li class="list-group-item d-flex align-items-center {% if not n.is_read %}bg-light{% endif %}">
-                                            <div class="flex-grow-1">
-                                                <h6 class="mb-1 d-inline">
-                                                    {% if n.notification_type == 'like' %}
-                                                        <span class="text-success">👍</span>
-                                                    {% elif n.notification_type == 'dislike' %}
-                                                        <span class="text-danger">👎</span>
-                                                    {% elif n.notification_type == 'comment' %}
-                                                        <span class="text-primary">💬</span>
-                                                    {% else %}
-                                                        <span class="text-secondary">🔔</span>
-                                                    {% endif %}
-                                                    {{ n.title }}
-                                                    {% if not n.is_read %}
-                                                        <span class="badge bg-danger ms-2">new</span>
-                                                    {% endif %}
-                                                </h6>
-                                                <br>
-                                                <span class="text-muted">{{ n.created_at|date:"d.m.Y H:i" }}</span>
-                                                <span class="ms-2">{{ n.message }}</span>
-                                            </div>
-                                            <div class="d-flex align-items-center gap-2 ms-auto">
-                                                {% if n.id and not n.is_read %}
-                                                    <form method="post" action="{% url 'MainApp:mark_notification_read' n.id %}" style="display:inline;">
-                                                        {% csrf_token %}
-                                                        <button type="submit" class="btn btn-sm btn-outline-success ms-2">Прочитано</button>
-                                                    </form>
-                                                {% endif %}
-                                                {% if n.id %}
-                                                    <form method="post" action="{% url 'MainApp:delete_notification' n.id %}" style="display:inline;">
-                                                        {% csrf_token %}
-                                                        <button type="submit" class="btn btn-sm btn-outline-danger ms-2" title="Удалить">🗑️</button>
-                                                    </form>
-                                                {% endif %}
-                                            </div>
-                                        </li>
-                                        {% endfor %}
-                                    </ul>
-                                    <div class="card-footer text-start">
-                                        <small>
-                                            Статус:
-                                            {% if group.notifications.0.is_read %}
-                                                <span class="text-success">Прочитано</span>
-                                            {% else %}
-                                                <span class="text-danger">Не прочитано</span>
-                                            {% endif %}
-                                        </small>
-                                    </div>
-                                </div>
-                            </div>
-                        {% endfor %}
-
-                        <form method="post" action="{% url 'MainApp:delete_all_read_notifications' %}" class="mt-4 text-end">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-danger">
-                                🗑️Очистить прочитанные уведомления
-                            </button>
-                        </form>
-
-                        {% include 'includes/paginator.html' %}
-
-                    {% else %}
-                        <div class="col-12">
-                            <div class="alert alert-info mt-3">У вас нет уведомлений.</div>
-                        </div>
-                    {% endif %}
-                </div>
+    {% if page_obj %}
+        {% include 'includes/notifications_list.html' with notifications=page_obj show_grouped=True request=request %}
+        {% include 'includes/paginator.html' %}
+    {% else %}
+        <div class="col-12">
+            <div class="alert alert-info mt-3">У вас нет уведомлений.</div>
+        </div>
+    {% endif %}
+</div>
             </div>
         </div>
     </div>
