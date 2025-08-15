@@ -216,9 +216,22 @@ def user_profile(request, user_id=None):
         user = get_object_or_404(User, id=user_id)
         is_owner = False
 
-    user_snippets = Snippet.objects.filter(user=user).select_related('user').prefetch_related('tags')
-    user_comments = Comment.objects.filter(author=user).select_related('snippet')
+    # Сниппеты пользователя + теги
+    user_snippets = (
+        Snippet.objects
+        .filter(user=user)
+        .select_related('user')
+        .prefetch_related('tags')
+    )
 
+    # Комментарии пользователя + сниппеты
+    user_comments = (
+        Comment.objects
+        .filter(author=user)
+        .select_related('snippet')
+    )
+
+    # История действий
     snippet_actions = [
         {
             'text': 'Создал сниппет',
@@ -243,8 +256,9 @@ def user_profile(request, user_id=None):
         for c in user_comments
     ]
 
+    # Лайки/дизлайки (GenericForeignKey — тут оптимизация сложнее)
     like_actions = []
-    for like in LikeDislike.objects.filter(user=user):
+    for like in LikeDislike.objects.filter(user=user).select_related('user'):
         obj = like.content_object
         if hasattr(obj, 'name'):
             obj_type = 'Сниппет'
@@ -277,7 +291,13 @@ def user_profile(request, user_id=None):
         'top_snippets': user_snippets.order_by('-views_count').select_related('user')[:5],
     }
 
-    notifications = Notification.objects.filter(recipient=user).select_related('snippet').order_by('-created_at')[:20]
+    # ОПТИМИЗАЦИЯ: select_related по snippet и user
+    notifications = (
+        Notification.objects
+        .filter(recipient=user)
+        .select_related('snippet', 'snippet__user')
+        .order_by('-created_at')[:20]
+    )
 
     context = {
         'user': user,
