@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Account Activation{% endblock %}
+
+{% block content %}
+ <div class="header">
+        <h1>Добро пожаловать!</h1>
+    </div>
+
+    <div class="content">
+        <h2>Здравствуйте, {{ user.username }}!</h2>
+
+        <p>Спасибо за регистрацию. Для завершения регистрации нажмите на кнопку ниже:</p>
+
+        <a href="{{ activation_url }}" class="button">Подтвердить аккаунт</a>
+
+        <p>Если кнопка не работает, скопируйте ссылку:</p>
+        <p>{{ activation_url }}</p>
+    </div>
+{% endblock %}

@@ -4,10 +4,13 @@ from datetime import datetime
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.models import User
+from django.contrib.auth.tokens import default_token_generator
 from django.contrib.contenttypes.models import ContentType
+from django.core.mail import send_mail
 from django.db.models import Avg
 from django.http import HttpResponseForbidden, HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import get_object_or_404
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 from MainApp.models import Snippet, Tag, Comment, Notification, LikeDislike
@@ -18,7 +21,7 @@ from django.db.models import Q, Count
 from django.core.paginator import Paginator
 from MainApp.signals import snippet_views, snippet_deleted
 from django.contrib import messages
-from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth import update_session_auth_hash, get_user_model, login
 
 
 def index_page(request):
@@ -175,10 +178,27 @@ def custom_login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
+        User = get_user_model()
 
-        user = auth.authenticate(request, username=username, password=password)
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            user = None
+
         if user is not None:
-            auth.login(request, user)
+            if not user.check_password(password):
+                context = {
+                    'errors': ['Неверные логин или пароль'],
+                    'username': username,
+                }
+                return render(request, 'index.html', context)
+            if not user.is_active:
+                context = {
+                    'errors': ['Аккаунт не активирован.\n Проверьте почту для подтверждения регистрации.'],
+                    'username': username,
+                }
+                return render(request, 'index.html', context)
+            login(request, user)
             return redirect('MainApp:home')
         else:
             context = {
@@ -200,11 +220,84 @@ def custom_registration(request):
     elif request.method == "POST":
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
-            user = form.save()  #
-            messages.success(request, f'Добро пожаловать, {user.username}! Вы успешно зарегистрированы.')
+            user = form.save(commit=False)
+            user.is_active = False
+            user.save()
+            send_activation_email(user, request)
+            messages.success(request, f'Вы успешно зарегистрированы! Проверьте почту для активации аккаунта.')
             return redirect('MainApp:home')
         else:
             return render(request, "custom_auth/register.html", {"form": form})
+
+def send_activation_email(user, request):
+    """
+    Отправляет email для подтверждения аккаунта
+    """
+    # Генерируем токен
+    token = default_token_generator.make_token(user)
+
+    # Создаем ссылку для подтверждения
+    activation_url = request.build_absolute_uri(
+        f'/activate/{user.id}/{token}/'
+    )
+
+    # Контекст для шаблона
+    context = {
+        'user': user,
+        'activation_url': activation_url,
+    }
+
+    # Рендерим HTML версию письма
+    html_message = render_to_string('custom_auth/account_activation.html', context)
+
+    # Рендерим текстовую версию письма
+    text_message = render_to_string('custom_auth/account_activation.txt', context)
+
+    # Отправляем email
+    send_mail(
+        subject='Подтверждение аккаунта',
+        message=text_message,
+        html_message=html_message,
+        from_email='noreply@yoursite.com',
+        recipient_list=[user.email],
+        fail_silently=False,
+    )
+
+    return token
+
+def verify_activation_token(user, token):
+    """
+    Проверяет токен подтверждения
+    """
+    return default_token_generator.check_token(user, token)
+
+def activate_account(request, user_id, token):
+    """
+    Подтверждение аккаунта пользователя по токену
+    """
+    try:
+        user = User.objects.get(id=user_id)
+
+        # Проверяем, не подтвержден ли уже аккаунт
+        if user.is_active:
+            messages.info(request, 'Ваш аккаунт уже подтвержден.')
+            return redirect('MainApp:home')
+
+        # Проверяем токен
+        if verify_activation_token(user, token):
+            user.is_active = True
+            user.save()
+            messages.success(request,
+                             'Ваш аккаунт успешно подтвержден! Теперь вы можете войти в систему.')
+            return redirect('MainApp:home')
+        else:
+            messages.error(request,
+                           'Недействительная ссылка для подтверждения. Возможно, она устарела.')
+            return redirect('MainApp:home')
+
+    except User.DoesNotExist:
+        messages.error(request, 'Пользователь не найден.')
+        return redirect('MainApp:home')
 
 @login_required
 def user_profile(request, user_id=None):

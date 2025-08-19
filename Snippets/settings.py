@@ -1,7 +1,5 @@
 from pathlib import Path
-
 import os
-
 from django.urls import reverse_lazy
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -168,3 +166,5 @@ MEDIA_ROOT = BASE_DIR / 'media'
 INTERNAL_IPS = [
 '127.0.0.1',
     ]
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
