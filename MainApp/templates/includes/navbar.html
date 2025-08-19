@@ -58,7 +58,10 @@
      data-bs-toggle="dropdown" aria-expanded="false">
     Авторизация
   </a>
+
+
   <div class="dropdown-menu dropdown-menu-end p-3" style="min-width: 300px;">
+            <hr style="border: none; border-top: 1px solid #bbb; margin: 1.5rem 0;">
     <form action="{% url 'MainApp:custom_login' %}" method="post" autocomplete="off">
       {% csrf_token %}
       <div class="mb-2">
@@ -69,15 +72,17 @@
       </div>
       <button class="btn btn-sm btn-success w-100" type="submit">Войти</button>
     </form>
+            <hr style="border: none; border-top: 1px solid #bbb; margin: 1.5rem 0;">
     <div class="text-center mt-2">
       <a href="{% url 'MainApp:set_new_pass' %}">Забыли пароль?</a>
     </div>
     <div class="text-center mt-2">
       <a href="{% url 'MainApp:custom_regist' %}">Регистрация</a>
     </div>
-          <div class="text-center mt-2">
+      <hr style="border: none; border-top: 1px solid #bbb; margin: 1.5rem 0;">
+  <div class="text-center mt-2">
       <a href="{% url 'MainApp:resend_email' %}">Повторно отправить подтверждение E-mail</a>
-    </div>
+  </div>
   </div>
 </li>
     {% endif %}

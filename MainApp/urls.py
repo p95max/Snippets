@@ -3,7 +3,7 @@ from MainApp.views import (index_page, add_snippet_page, snippet_detail,
                            edit_snippet_page, delete_snippet_page, custom_login, custom_logout, snippets_list,
                            custom_registration, comment_add, search_snippets, snippets_stats, snippets_by_tag, my_snippets,
                            user_notifications, unread_notifications_longpoll, mark_notification_read, delete_notification, delete_all_read_notifications,
-                           like_comment, like_snippet, user_profile, edit_profile, set_new_userpassword, activate_account, resend_email_view)
+                           like_comment, like_snippet, user_profile, edit_profile, set_new_userpassword, activate_account, resend_email)
 from MainApp.views_api import simple_api_view, api_test_page
 
 
@@ -24,7 +24,7 @@ urlpatterns = [
     path('regist/', custom_registration, name='custom_regist'),
     path('set_new_pass', set_new_userpassword, name='set_new_pass'),
     path('activate/<int:user_id>/<str:token>/', activate_account, name='activate_account'),
-    path('resend_email/', resend_email_view, name='resend_email'),
+    path('resend_email/', resend_email, name='resend_email'),
 
     # Profile
     path('profile/', user_profile, name='user_profile'),

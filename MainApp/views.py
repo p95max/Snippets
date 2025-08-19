@@ -175,6 +175,7 @@ def snippets_stats(request):
 
     return render(request, 'snippets_stats.html', context=context)
 
+
 # Custom auth
 def custom_login(request):
     if request.method == 'POST':
@@ -189,17 +190,17 @@ def custom_login(request):
 
         if user is not None:
             if not user.check_password(password):
-                messages.warning(request, "Неверные логин или пароль")
+                messages.error(request, "Неверные логин или пароль")
                 return render(request, 'index.html', {"auth_dropdown_open": True, "username": username})
 
             if not user.is_active:
-                messages.warning(request, "Аккаунт не активирован. Проверьте почту для подтверждения регистрации.")
+                messages.error(request, "Аккаунт не активирован. Проверьте почту для подтверждения регистрации.")
                 return render(request, 'index.html', {"auth_dropdown_open": True, "username": username})
 
             login(request, user)
             return redirect('MainApp:home')
         else:
-            messages.warning(request, "Неверные логин или пароль")
+            messages.error(request, "Неверные логин или пароль")
             return render(request, 'index.html', {"auth_dropdown_open": True, "username": username})
     return redirect('MainApp:home')
 
@@ -294,21 +295,23 @@ def activate_account(request, user_id, token):
         messages.error(request, 'Пользователь не найден.')
         return redirect('MainApp:home')
 
-def resend_email_view(request):
+def resend_email(request):
     if request.method == "POST":
         email = request.POST.get("email")
         User = get_user_model()
         try:
             user = User.objects.get(email=email)
             if user.is_active:
-                messages.info(request, "Этот email уже подтверждён.")
+                messages.error(request, "Этот email уже подтверждён.")
             else:
                 send_activation_email(user)
                 messages.success(request, "Письмо с подтверждением отправлено повторно.")
         except User.DoesNotExist:
             messages.error(request, "Пользователь с таким email не найден.")
-        return redirect("resend_email")
+        return redirect("MainApp:resend_email")
+
     return render(request, "custom_auth/resend_email.html")
+
 
 # User profile
 @login_required
@@ -466,7 +469,6 @@ def set_new_userpassword(request):
     return render(request, 'set_new_pass.html', {'form': form})
 
 
-
 #CRUD
 @login_required
 def add_snippet_page(request):
@@ -518,6 +520,7 @@ def delete_snippet_page(request, pk):
 
     return redirect('MainApp:user_snippets')
 
+
 # Comments
 @login_required
 def comment_add(request):
@@ -539,6 +542,7 @@ def comment_add(request):
         return redirect('MainApp:snippet-detail', id=snippet_id)
 
     return HttpResponseNotAllowed(['POST'])
+
 
 # Notifications
 @login_required
@@ -629,6 +633,7 @@ def unread_notifications_longpoll(request):
         'unread_count': current_count,
         'timestamp': str(datetime.now())
     })
+
 
 # Likes
 @require_POST
