@@ -82,4 +82,17 @@
 </li>
     {% endif %}
   </div>
+
+{% if auth_dropdown_open %}
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    var dropdown = document.getElementById('authDropdown');
+    if (dropdown) {
+      var dropdownInstance = new bootstrap.Dropdown(dropdown);
+      dropdownInstance.show();
+    }
+  });
+</script>
+{% endif %}
 </nav>
+

@@ -25,7 +25,9 @@ from django.contrib.auth import update_session_auth_hash, get_user_model, login
 
 
 def index_page(request):
-    context = {'pagename': 'PythonBin'}
+    context = {
+        'pagename': 'PythonBin',
+        "auth_dropdown_open": True,}
 
     return render(request, 'index.html', context)
 
@@ -187,26 +189,18 @@ def custom_login(request):
 
         if user is not None:
             if not user.check_password(password):
-                context = {
-                    'errors': ['Неверные логин или пароль'],
-                    'username': username,
-                }
-                return render(request, 'index.html', context)
+                messages.warning(request, "Неверные логин или пароль")
+                return render(request, 'index.html', {"auth_dropdown_open": True, "username": username})
 
             if not user.is_active:
-                context = {
-                    'errors': ['Аккаунт не активирован.\n Проверьте почту для подтверждения регистрации.'],
-                    'username': username,
-                }
-                return render(request, 'index.html', context)
+                messages.warning(request, "Аккаунт не активирован. Проверьте почту для подтверждения регистрации.")
+                return render(request, 'index.html', {"auth_dropdown_open": True, "username": username})
+
             login(request, user)
             return redirect('MainApp:home')
         else:
-            context = {
-                'errors': ['Неверные логин или пароль'],
-                'username': username,
-            }
-            return render(request, 'index.html', context)
+            messages.warning(request, "Неверные логин или пароль")
+            return render(request, 'index.html', {"auth_dropdown_open": True, "username": username})
     return redirect('MainApp:home')
 
 def custom_logout(request):
