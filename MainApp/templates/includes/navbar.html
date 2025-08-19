@@ -1,12 +1,10 @@
-<header class="navbar navbar-expand-lg navbar-dark" style="background-color:#24292e; padding: 0.5rem 1rem;">
+<nav class="navbar navbar-expand-lg navbar-dark" style="background-color:#24292e; padding: 0.5rem 1rem;">
   <a class="navbar-brand" href="{% url 'MainApp:home' %}">
     <span style="color: #40E0D0; font-weight: bold;">&lt;/&gt;</span> PythonBin
   </a>
-
   <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
     <span class="navbar-toggler-icon"></span>
   </button>
-
   <div class="collapse navbar-collapse" id="navbarContent">
     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
       <li class="nav-item">
@@ -29,17 +27,13 @@
     </ul>
 
     {% if request.user.is_authenticated %}
-
       {% include 'includes/search_form.html' %}
-
       <a class="btn btn-outline-warning me-2" href="{% url 'MainApp:notifications' %}">
         🔔
         {% if unread_count > 0 %}
           <span class="badge bg-danger">{{ unread_count }}</span>
         {% endif %}
       </a>
-
-      <!-- User dropdown -->
       <li class="nav-item dropdown ms-2 list-unstyled d-inline-block">
         <a class="btn btn-outline-light dropdown-toggle" href="#" id="userDropdown" role="button"
            data-bs-toggle="dropdown" aria-expanded="false">
@@ -58,25 +52,34 @@
             </a>
         </div>
       </li>
-
     {% else %}
-
-      <form class="d-flex align-items-center" action="{% url 'MainApp:custom_login' %}" method="post" style="gap:0.5rem;">
-        {% csrf_token %}
-        <input class="form-control form-control-sm" type="text" name="username" placeholder="Имя пользователя" required style="width: 150px;">
-        <input class="form-control form-control-sm" type="password" name="password" placeholder="Пароль" required style="width: 150px;">
-        <button class="btn btn-sm btn-outline-success" type="submit">Войти</button>
-        <a class="btn btn-sm btn-outline-info" href="{% url 'MainApp:custom_regist' %}">Регистрация</a>
-      </form>
-
-      {% if errors %}
-      <ul class="text-danger small mt-2 mb-0">
-        {% for error in errors %}
-          <li>{{ error }}</li>
-        {% endfor %}
-      </ul>
-      {% endif %}
-
+<li class="nav-item dropdown">
+  <a class="btn btn-outline-info dropdown-toggle" href="#" id="authDropdown" role="button"
+     data-bs-toggle="dropdown" aria-expanded="false">
+    Авторизация
+  </a>
+  <div class="dropdown-menu dropdown-menu-end p-3" style="min-width: 300px;">
+    <form action="{% url 'MainApp:custom_login' %}" method="post" autocomplete="off">
+      {% csrf_token %}
+      <div class="mb-2">
+        <input class="form-control form-control-sm" type="text" name="username" placeholder="Имя пользователя" required>
+      </div>
+      <div class="mb-2">
+        <input class="form-control form-control-sm" type="password" name="password" placeholder="Пароль" required>
+      </div>
+      <button class="btn btn-sm btn-success w-100" type="submit">Войти</button>
+    </form>
+    <div class="text-center mt-2">
+      <a href="{% url 'MainApp:set_new_pass' %}">Забыли пароль?</a>
+    </div>
+    <div class="text-center mt-2">
+      <a href="{% url 'MainApp:custom_regist' %}">Регистрация</a>
+    </div>
+          <div class="text-center mt-2">
+      <a href="{% url 'MainApp:resend_email' %}">Повторно отправить подтверждение E-mail</a>
+    </div>
+  </div>
+</li>
     {% endif %}
   </div>
-</header>
+</nav>

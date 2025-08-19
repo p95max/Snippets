@@ -192,6 +192,7 @@ def custom_login(request):
                     'username': username,
                 }
                 return render(request, 'index.html', context)
+
             if not user.is_active:
                 context = {
                     'errors': ['Аккаунт не активирован.\n Проверьте почту для подтверждения регистрации.'],
@@ -299,6 +300,23 @@ def activate_account(request, user_id, token):
         messages.error(request, 'Пользователь не найден.')
         return redirect('MainApp:home')
 
+def resend_email_view(request):
+    if request.method == "POST":
+        email = request.POST.get("email")
+        User = get_user_model()
+        try:
+            user = User.objects.get(email=email)
+            if user.is_active:
+                messages.info(request, "Этот email уже подтверждён.")
+            else:
+                send_activation_email(user)
+                messages.success(request, "Письмо с подтверждением отправлено повторно.")
+        except User.DoesNotExist:
+            messages.error(request, "Пользователь с таким email не найден.")
+        return redirect("resend_email")
+    return render(request, "custom_auth/resend_email.html")
+
+# User profile
 @login_required
 def user_profile(request, user_id=None):
     if user_id is None or int(user_id) == request.user.id:
