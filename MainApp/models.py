@@ -84,6 +84,8 @@ class Notification(models.Model):
 
     snippet = models.ForeignKey('Snippet', null=True, blank=True, on_delete=models.SET_NULL)
     recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    actor = models.ForeignKey(User, null=True, blank=True, related_name='actor_notifications',
+                              on_delete=models.SET_NULL)
     notification_type = models.CharField(max_length=20, choices=NOTIFICATION_TYPES)
     title = models.CharField(max_length=255)
     message = models.TextField()

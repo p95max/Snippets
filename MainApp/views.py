@@ -421,7 +421,7 @@ def user_profile(request, user_id=None):
     notifications = (
         Notification.objects
         .filter(recipient=user)
-        .select_related('snippet', 'snippet__user')
+        .select_related('snippet', 'snippet__user', 'actor')
         .order_by('-created_at')[:20]
     )
 
@@ -554,7 +554,7 @@ def user_notifications(request, per_page=10):
     all_notifications = Notification.objects.filter(
         recipient=request.user,
         notification_type__in=['comment', 'like', 'dislike', 'follow'],
-    ).select_related('snippet', 'snippet__user').order_by('-created_at')
+    ).select_related('snippet', 'snippet__user', 'actor').order_by('-created_at')
 
     unread_count = all_notifications.filter(is_read=False).count()
 
@@ -744,6 +744,7 @@ def subscribe_author(request, author_id):
     if created:
         Notification.objects.create(
             recipient=author,
+            actor=request.user,
             notification_type='follow',
             title='Новый подписчик',
             message=f'{request.user.username} подписался на вас.',

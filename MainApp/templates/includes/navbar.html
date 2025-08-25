@@ -34,70 +34,23 @@
           <span class="badge bg-danger">{{ unread_count }}</span>
         {% endif %}
       </a>
-      <li class="nav-item dropdown ms-2 list-unstyled d-inline-block">
-        <a class="btn btn-outline-light dropdown-toggle" href="#" id="userDropdown" role="button"
-           data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="fas fa-user"></i> {{ request.user.username }}
+      <li class="nav-item ms-2 list-unstyled d-inline-block">
+        <a class="btn btn-outline-light" href="{% url 'MainApp:user_profile' %}">
+          <i class="fas fa-user"></i> {{ request.user.username }}
         </a>
-        <div class="dropdown-menu dropdown-menu-end" style="min-width: 200px;">
-            <a class="dropdown-item" href="{% url 'MainApp:user_profile' %}">
-                <i class="fas fa-user-circle"></i> Мой профиль
-            </a>
-            <a class="dropdown-item" href="{% url 'MainApp:edit_profile' %}">
-                <i class="fas fa-edit"></i> Редактировать профиль
-            </a>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="{% url 'MainApp:custom_logout' %}">
-                <i class="fas fa-sign-out-alt"></i> Выйти
-            </a>
-        </div>
+        <a class="btn btn-outline-light ms-2" href="{% url 'MainApp:custom_logout' %}">
+          <i class="fas fa-sign-out-alt"></i> Выйти
+        </a>
       </li>
     {% else %}
-<li class="nav-item dropdown">
-  <a class="btn btn-outline-info dropdown-toggle" href="#" id="authDropdown" role="button"
-     data-bs-toggle="dropdown" aria-expanded="false">
-    Авторизация
-  </a>
-
-
-  <div class="dropdown-menu dropdown-menu-end p-3" style="min-width: 300px;">
-            <hr style="border: none; border-top: 1px solid #bbb; margin: 1.5rem 0;">
-    <form action="{% url 'MainApp:custom_login' %}" method="post" autocomplete="off">
-      {% csrf_token %}
-      <div class="mb-2">
-        <input class="form-control form-control-sm" type="text" name="username" placeholder="Имя пользователя" required>
-      </div>
-      <div class="mb-2">
-        <input class="form-control form-control-sm" type="password" name="password" placeholder="Пароль" required>
-      </div>
-      <button class="btn btn-sm btn-success w-100" type="submit">Войти</button>
-    </form>
-            <hr style="border: none; border-top: 1px solid #bbb; margin: 1.5rem 0;">
-    <div class="text-center mt-2">
-      <a href="{% url 'MainApp:set_new_pass' %}">Забыли пароль?</a>
-    </div>
-    <div class="text-center mt-2">
-      <a href="{% url 'MainApp:custom_regist' %}">Регистрация</a>
-    </div>
-      <hr style="border: none; border-top: 1px solid #bbb; margin: 1.5rem 0;">
-  <div class="text-center mt-2">
-      <a href="{% url 'MainApp:resend_email' %}">Повторно отправить подтверждение E-mail</a>
-  </div>
-  </div>
-</li>
+      <form action="{% url 'MainApp:custom_login' %}" method="post" autocomplete="off" class="d-flex align-items-center gap-2">
+        {% csrf_token %}
+        <input class="form-control form-control-sm" type="text" name="username" placeholder="Имя пользователя" required style="width: 150px;">
+        <input class="form-control form-control-sm" type="password" name="password" placeholder="Пароль" required style="width: 150px;">
+        <button class="btn btn-sm btn-success" type="submit">Войти</button>
+        <a class="btn btn-link btn-sm text-light" href="{% url 'MainApp:set_new_pass' %}">Забыли пароль?</a>
+        <a class="btn btn-link btn-sm text-light" href="{% url 'MainApp:custom_regist' %}">Регистрация</a>
+      </form>
     {% endif %}
   </div>
-
-{% if auth_dropdown_open %}
-<script>
-  document.addEventListener("DOMContentLoaded", function() {
-    var dropdown = document.getElementById('authDropdown');
-    if (dropdown) {
-      var dropdownInstance = new bootstrap.Dropdown(dropdown);
-      dropdownInstance.show();
-    }
-  });
-</script>
-{% endif %}
 </nav>
-
