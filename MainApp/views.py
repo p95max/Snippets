@@ -520,9 +520,9 @@ def delete_snippet_page(request, pk):
         snippet_id = snippet.id
         snippet.delete()
         snippet_deleted.send(sender=Snippet, snippet_id=snippet_id)
-        return redirect('MainApp:user_snippets')
+        return redirect('MainApp:user-snippets')
 
-    return redirect('MainApp:user_snippets')
+    return redirect('MainApp:user-snippets')
 
 
 # Comments
@@ -553,7 +553,6 @@ def comment_add(request):
 def user_notifications(request, per_page=10):
     all_notifications = Notification.objects.filter(
         recipient=request.user,
-        notification_type__in=['comment', 'like', 'dislike', 'follow'],
     ).select_related('snippet', 'snippet__user', 'actor').order_by('-created_at')
 
     unread_count = all_notifications.filter(is_read=False).count()

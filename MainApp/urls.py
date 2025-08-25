@@ -44,7 +44,7 @@ urlpatterns = [
     # Notifications
     path('notifications/', user_notifications, name='notifications'),
     path('api/unread-notifications-longpoll/', unread_notifications_longpoll, name='unread_notifications_longpoll'),
-    path('notifications/mark-read/<int:pk>/', mark_notification_read, name='mark_notification_read'),
+    path('notifications/mark-read/<int:notif_id>/', mark_notification_read, name='mark_notification_read'),
     path('notifications/delete/<int:notif_id>/', delete_notification, name='delete_notification'),
     path('notifications/delete-all-read/', delete_all_read_notifications, name='delete_all_read_notifications'),
 

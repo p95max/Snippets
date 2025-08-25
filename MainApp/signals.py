@@ -90,7 +90,7 @@ def create_user_profile(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=Snippet)
 def notify_subscribers_new_snippet(sender, instance, created, **kwargs):
-    if created:
+    if created and instance.public:
         author = instance.user
         subscribers = SubscriptionAuthor.objects.filter(author=author).select_related('subscriber')
         notifications = []
@@ -99,26 +99,10 @@ def notify_subscribers_new_snippet(sender, instance, created, **kwargs):
                 continue
             notifications.append(Notification(
                 recipient=sub.subscriber,
-                notification_type='follow',
-                title=f'Новый сниппет от {author.username}',
-                message=f'{author.username} опубликовал новый сниппет: {instance.name}',
-                snippet=instance,
-            ))
-        Notification.objects.bulk_create(notifications)
-
-@receiver(post_save, sender=Snippet)
-def notify_subscribers_new_snippet(sender, instance, created, **kwargs):
-    if created and instance.public:
-        author = instance.user
-        subscribers = SubscriptionAuthor.objects.filter(author=author).select_related('subscriber')
-        notifications = []
-        for sub in subscribers:
-            notifications.append(Notification(
-                recipient=sub.subscriber,
                 actor=author,
                 notification_type='new_snippet',
-                title='Новый сниппет от автора',
-                message=f'Автор {author.username} опубликовал новый сниппет: {instance.name}',
+                title=f'Новый сниппет от {author.username}',
+                message=f'{author.username} опубликовал новый сниппет: {instance.name}',
                 snippet=instance,
             ))
         Notification.objects.bulk_create(notifications)
