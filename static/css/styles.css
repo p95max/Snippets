@@ -79,4 +79,9 @@ footer {
     border-color: #dc3545;
 }
 
+.unread-notification {
+  background-color: #fff3cd;
+  border-left: 5px solid #ffc107;
+}
+
 
