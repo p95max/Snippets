@@ -80,6 +80,7 @@ class Notification(models.Model):
         ('comment', 'Новый комментарий'),
         ('like', 'Новый лайк'),
         ('follow', 'Новый подписчик'),
+        ('new_snippet', 'Новый сниппет автора на кого Вы подписаны'),
     ]
 
     snippet = models.ForeignKey('Snippet', null=True, blank=True, on_delete=models.SET_NULL)

@@ -732,7 +732,6 @@ def search_snippets(request):
 
 
 # subscribe
-
 @login_required
 def subscribe_author(request, author_id):
     if request.user.id == author_id:
@@ -748,6 +747,14 @@ def subscribe_author(request, author_id):
             notification_type='follow',
             title='Новый подписчик',
             message=f'{request.user.username} подписался на вас.',
+            snippet=None,
+        )
+        Notification.objects.create(
+            recipient=request.user,
+            actor=author,
+            notification_type='follow',
+            title='Вы подписались',
+            message=f'Вы подписались на {author.username}.',
             snippet=None,
         )
         messages.success(request, f"Вы подписались на {author.username}.")
