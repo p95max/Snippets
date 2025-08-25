@@ -2,7 +2,6 @@ import time
 from collections import defaultdict
 from datetime import datetime
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.models import User
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.contenttypes.models import ContentType
@@ -13,7 +12,7 @@ from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.views.decorators.http import require_POST
-from MainApp.models import Snippet, Tag, Comment, Notification, LikeDislike
+from MainApp.models import Snippet, Tag, Comment, Notification, LikeDislike, SubscriptionAuthor
 from MainApp.forms import SnippetForm, UserRegistrationForm, CommentForm, SnippetSearchForm, UserForm, UserProfileForm, SetPassword
 from django.contrib import auth
 from django.shortcuts import render, redirect
@@ -128,11 +127,17 @@ def snippet_detail(request, id):
             if user_like_obj:
                 comment.user_like = user_like_obj.vote
 
+    subscribed_author_ids = []
+    if request.user.is_authenticated:
+        subscribed_author_ids = list(request.user.subscriptions.all().values_list('author_id', flat=True))
+
     context = {
         'pagename': f'Сниппет: {snippet.name}',
         'snippet': snippet,
         'comment_form': comment_form,
         'comments_page': comments_page,
+        'subscribed_author_ids': subscribed_author_ids,
+
     }
     return render(request, 'snippet_detail.html', context=context)
 
@@ -369,7 +374,6 @@ def user_profile(request, user_id=None):
     for ct_id, ids in content_type_to_ids.items():
         ct = ContentType.objects.get_for_id(ct_id)
         model = ct.model_class()
-        # Если это Comment, делаем select_related('snippet')
         if model.__name__ == 'Comment':
             objs = model.objects.filter(id__in=ids).select_related('snippet')
         else:
@@ -547,22 +551,16 @@ def comment_add(request):
 # Notifications
 @login_required
 def user_notifications(request, per_page=10):
-    notifications = Notification.objects.filter(
+    all_notifications = Notification.objects.filter(
         recipient=request.user,
-        notification_type__in=['comment', 'like', 'dislike'],
-        snippet__isnull=False
+        notification_type__in=['comment', 'like', 'dislike', 'follow'],
     ).select_related('snippet', 'snippet__user').order_by('-created_at')
 
-    paginator = Paginator(notifications, per_page)
+    unread_count = all_notifications.filter(is_read=False).count()
+
+    paginator = Paginator(all_notifications, per_page)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-
-    unread_count = Notification.objects.filter(
-        recipient=request.user,
-        notification_type__in=['comment', 'like', 'dislike'],
-        snippet__isnull=False,
-        is_read=False
-    ).count()
 
     context = {
         'page_obj': page_obj,
@@ -733,9 +731,35 @@ def search_snippets(request):
 
 
 
+# subscribe
 
+@login_required
+def subscribe_author(request, author_id):
+    if request.user.id == author_id:
+        messages.error(request, "Нельзя подписаться на самого себя.")
+        return redirect('MainApp:user_profile')
 
+    author = get_object_or_404(User, id=author_id)
+    subscription, created = SubscriptionAuthor.objects.get_or_create(subscriber=request.user, author=author)
+    if created:
+        Notification.objects.create(
+            recipient=author,
+            notification_type='follow',
+            title='Новый подписчик',
+            message=f'{request.user.username} подписался на вас.',
+            snippet=None,
+        )
+        messages.success(request, f"Вы подписались на {author.username}.")
+    else:
+        messages.info(request, f"Вы уже подписаны на {author.username}.")
+    return redirect('MainApp:user_profile_other', user_id=author_id)
 
+@login_required
+def unsubscribe_author(request, author_id):
+    author = get_object_or_404(User, id=author_id)
+    SubscriptionAuthor.objects.filter(subscriber=request.user, author=author).delete()
+    messages.success(request, f"Вы отписались от {author.username}.")
+    return redirect('MainApp:user_profile_other', user_id=author_id)
 
 
 

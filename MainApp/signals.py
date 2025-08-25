@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver, Signal
 from django.db.models import F
-from MainApp.models import Snippet, Comment, Notification, LikeDislike, UserProfile
+from MainApp.models import Snippet, Comment, Notification, LikeDislike, UserProfile, SubscriptionAuthor
 
 snippet_views = Signal()
 snippet_deleted = Signal()
@@ -87,3 +87,22 @@ def create_snippet_like_notification(sender, instance, created, **kwargs):
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
         UserProfile.objects.create(user=instance)
+
+
+@receiver(post_save, sender=Snippet)
+def notify_subscribers_new_snippet(sender, instance, created, **kwargs):
+    if created:
+        author = instance.user
+        subscribers = SubscriptionAuthor.objects.filter(author=author).select_related('subscriber')
+        notifications = []
+        for sub in subscribers:
+            if sub.subscriber == author:
+                continue
+            notifications.append(Notification(
+                recipient=sub.subscriber,
+                notification_type='follow',
+                title=f'Новый сниппет от {author.username}',
+                message=f'{author.username} опубликовал новый сниппет: {instance.name}',
+                snippet=instance,
+            ))
+        Notification.objects.bulk_create(notifications)

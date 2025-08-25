@@ -95,3 +95,26 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"Уведомление для {self.recipient.username}: {self.title}"
+
+
+class SubscriptionAuthor(models.Model):
+    subscriber = models.ForeignKey(User, on_delete=models.CASCADE, related_name='subscriptions')
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='subscribers')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('subscriber', 'author')
+
+    def __str__(self):
+        return f"{self.subscriber.username} подписан на {self.author.username}"
+
+class SnippetSubscription(models.Model):
+    subscriber = models.ForeignKey(User, on_delete=models.CASCADE, related_name='snippet_subscriptions')
+    snippet = models.ForeignKey(Snippet, on_delete=models.CASCADE, related_name='subscribers')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('subscriber', 'snippet')
+
+    def __str__(self):
+        return f"{self.subscriber.username} подписан на сниппет {self.snippet.name}"

@@ -1,9 +1,11 @@
 from django.urls import path
+from MainApp import views_cbv
 from MainApp.views import (index_page, add_snippet_page, snippet_detail,
                            edit_snippet_page, delete_snippet_page, custom_login, custom_logout, snippets_list,
                            custom_registration, comment_add, search_snippets, snippets_stats, snippets_by_tag, my_snippets,
                            user_notifications, unread_notifications_longpoll, mark_notification_read, delete_notification, delete_all_read_notifications,
-                           like_comment, like_snippet, user_profile, edit_profile, set_new_userpassword, activate_account, resend_email)
+                           like_comment, like_snippet, user_profile, edit_profile, set_new_userpassword, activate_account, resend_email, subscribe_author,
+                           unsubscribe_author)
 from MainApp.views_api import simple_api_view, api_test_page
 
 
@@ -53,4 +55,14 @@ urlpatterns = [
     # Like
     path('like-comment/', like_comment, name='like_comment'),
     path('like-snippet/', like_snippet, name='like_snippet'),
+
+    # CBV
+    # path('notifications/', views_cbv.UserNotificationsView.as_view(), name='notifications'),
+    # path('snippet/<int:id>/', views_cbv.SnippetDetailView.as_view(), name='snippet-detail'),
+    # path('snippet/<int:pk>/delete/', views_cbv.SnippetDeleteView.as_view(), name='snippet-delete'),
+    # path('logout/', views_cbv.LogoutView.as_view(next_page='MainApp:home'), name='custom_logout'),
+
+    # subscribe
+    path('subscribe/<int:author_id>/', subscribe_author, name='subscribe_author'),
+    path('unsubscribe/<int:author_id>/', unsubscribe_author, name='unsubscribe_author'),
 ]

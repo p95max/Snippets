@@ -59,6 +59,18 @@
                 <span class="fw-bold">Автор:</span>
                 <a href="{% url 'MainApp:user_profile_other' snippet.user.id %}">{{ snippet.user.username }}</a>
 
+{% if request.user.is_authenticated and snippet.user.id != request.user.id %}
+  {% if snippet.user.id in subscribed_author_ids %}
+    <a href="{% url 'MainApp:unsubscribe_author' snippet.user.id %}" class="btn btn-outline-danger btn-sm">
+      <i class="bi bi-person-dash"></i> Отписаться
+    </a>
+  {% else %}
+    <a href="{% url 'MainApp:subscribe_author' snippet.user.id %}" class="btn btn-primary btn-sm">
+      <i class="bi bi-person-plus"></i> Подписаться
+    </a>
+  {% endif %}
+{% endif %}
+
                 <form class="like-form" data-object-id="{{ snippet.id }}" data-url="{% url 'MainApp:like_snippet' %}">
                     {% csrf_token %}
                     <button type="button" class="btn btn-outline-success btn-sm like-btn {% if snippet.user_like == 1 %}active{% endif %}">👍</button>
