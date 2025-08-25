@@ -30,59 +30,77 @@ def index_page(request):
 
     return render(request, 'index.html', context)
 
-def snippets_list(request):
-    pagename = 'Просмотр сниппетов'
-    lang = request.GET.get('lang')
-    user_id = request.GET.get('user_id')
-    search = request.GET.get('search')
+def snippets_list(request, per_page=10):
     sort = request.GET.get('sort', 'creation_date')
+    order = request.GET.get('order', 'desc')
+    user_id = request.GET.get('user_id')
 
-    qs = Snippet.objects.annotate(num_comments=Count('comments')).select_related('user').prefetch_related('tags')
+    allowed_sort_fields = {
+        'name': 'name',
+        'lang': 'lang',
+        'creation_date': 'creation_date',
+        'updated_date': 'updated_date',
+        'is_public': 'public',
+        'user': 'user__username',
+        'num_comments': 'num_comments',
+        'views_count': 'views_count',
+    }
+
+    sort_field = allowed_sort_fields.get(sort, 'creation_date')
+    if order == 'desc':
+        sort_field = '-' + sort_field
+
+    qs = Snippet.objects.filter(public=True).annotate(
+        num_comments=Count('comments')
+    )
 
     if user_id:
-        qs = qs.filter(user_id=user_id)
-    if lang:
-        qs = qs.filter(lang=lang)
-    if search:
-        qs = qs.filter(Q(name__icontains=search) | Q(code__icontains=search))
+        qs = qs.filter(user__id=user_id)
 
-    if request.user.is_authenticated:
-        qs = qs.filter(Q(public=True) | Q(user=request.user))
-    else:
-        qs = qs.filter(public=True)
+    qs = qs.order_by(sort_field)
 
-    allowed_fields = ['name', 'lang', 'creation_date']
-    if sort.startswith('-'):
-        sort_field = sort[1:]
-    else:
-        sort_field = sort
-    if sort_field not in allowed_fields:
-        sort = '-creation_date'
-
-    qs = qs.order_by(sort)
-
-    paginator = Paginator(qs, 5)
+    paginator = Paginator(qs, per_page)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    active_users = User.objects.filter(snippets__public=True).distinct()
+    active_users = User.objects.filter(
+        snippets__public=True
+    ).annotate(
+        snippet_count=Count('snippets')
+    ).distinct()
 
     context = {
-        'pagename': pagename,
-        'lang': lang,
-        'user_id': user_id,
-        'search': search,
-        'sort': sort,
-        'active_users': active_users,
-        'count_snippets': qs.count(),
         'page_obj': page_obj,
-        'snippets': page_obj,
+        'count_snippets': qs.count(),
+        'sort': sort,
+        'order': order,
+        'active_users': active_users,
     }
     return render(request, 'view_snippets.html', context)
 
 @login_required
-def my_snippets(request, per_page = 5):
-    qs = Snippet.objects.filter(user=request.user)
+def my_snippets(request, per_page=5):
+    sort = request.GET.get('sort', 'creation_date')
+    order = request.GET.get('order', 'desc')
+
+    allowed_sort_fields = {
+        'name': 'name',
+        'lang': 'lang',
+        'creation_date': 'creation_date',
+        'updated_date': 'updated_date',
+        'is_public': 'public',
+        'num_comments': 'num_comments',
+        'views_count': 'views_count',
+    }
+
+    sort_field = allowed_sort_fields.get(sort, 'creation_date')
+
+    if order == 'desc':
+        sort_field = '-' + sort_field
+
+    qs = Snippet.objects.filter(user=request.user).annotate(
+        num_comments=Count('comments')
+    ).order_by(sort_field)
 
     paginator = Paginator(qs, per_page)
     page_number = request.GET.get('page')
@@ -91,8 +109,8 @@ def my_snippets(request, per_page = 5):
     context = {
         'page_obj': page_obj,
         'count_snippets': qs.count(),
-        'sort': request.GET.get('sort', ''),
-        'order': request.GET.get('order', ''),
+        'sort': sort,
+        'order': order,
     }
     return render(request, 'user_snippets.html', context)
 
