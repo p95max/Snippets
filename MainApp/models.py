@@ -3,6 +3,8 @@ from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelatio
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
+User._meta.get_field('email')._unique = True
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
@@ -15,6 +17,7 @@ class UserProfile(models.Model):
         if self.avatar:
             return self.avatar.url
         return '/static/images/default-avatar.png'
+
 
 class LikeDislike(models.Model):
     LIKE = 1
@@ -34,6 +37,7 @@ class LikeDislike(models.Model):
     class Meta:
         unique_together = ['user', 'content_type', 'object_id']
 
+
 LANG_CHOICES = [
     ('-', '--- выберите ---'),
     ('python', 'Python'),
@@ -47,6 +51,7 @@ class Tag(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class Snippet(models.Model):
     name = models.CharField(max_length=100)
@@ -64,6 +69,7 @@ class Snippet(models.Model):
     def __str__(self):
         return f"{self.name} ({self.get_lang_display()})"
 
+
 class Comment(models.Model):
     text = models.TextField()
     creation_date = models.DateTimeField(auto_now_add=True)
@@ -74,6 +80,7 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"{self.text[:10]}... by {self.author}"
+
 
 class Notification(models.Model):
     NOTIFICATION_TYPES = [
@@ -110,6 +117,7 @@ class SubscriptionAuthor(models.Model):
 
     def __str__(self):
         return f"{self.subscriber.username} подписан на {self.author.username}"
+
 
 class SnippetSubscription(models.Model):
     subscriber = models.ForeignKey(User, on_delete=models.CASCADE, related_name='snippet_subscriptions')
