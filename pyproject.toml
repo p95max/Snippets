@@ -20,6 +20,7 @@ selenium = "^4.34.2"
 webdriver-manager = "^4.0.2"
 pillow = "^11.3.0"
 django-debug-toolbar = "^6.0.0"
+gunicorn = "^23.0.0"
 
 
 [tool.poetry.group.dev.dependencies]
