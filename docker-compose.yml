@@ -1,12 +1,37 @@
-version: '3.8'
 services:
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: snippets
+      POSTGRES_USER: snippets_user
+      POSTGRES_PASSWORD: supersecretpassword
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   web:
     build: .
+    depends_on:
+      db:
+        condition: service_healthy
     ports:
       - "8000:8000"
     volumes:
       - .:/app
     environment:
       DJANGO_SETTINGS_MODULE: Snippets.settings
-      SECRET_KEY: your-secret-key
-      DEBUG: "1"
+      POSTGRES_DB: snippets
+      POSTGRES_USER: snippets_user
+      POSTGRES_PASSWORD: supersecretpassword
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+      ALLOWED_HOSTS: "localhost 127.0.0.1 0.0.0.0"
+    command: /app/docker/entrypoint.sh
+
+volumes:
+  postgres_data:
