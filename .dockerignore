@@ -1,0 +1,9 @@
+.venv
+demo/
+media
+
+.gitignore
+db.sqlite3
+build.sh
+demo.sql
+django_debug.log
