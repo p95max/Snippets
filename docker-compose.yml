@@ -3,9 +3,9 @@ services:
     image: postgres:15-alpine
     restart: always
     environment:
-      POSTGRES_DB: snippets
-      POSTGRES_USER: snippets_user
-      POSTGRES_PASSWORD: 1111
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -23,18 +23,13 @@ services:
       - "8000:8000"
     volumes:
       - .:/app
+    env_file:
+      - .env
     environment:
       DJANGO_SETTINGS_MODULE: Snippets.settings
-      POSTGRES_DB: snippets
-      POSTGRES_USER: snippets_user
-      POSTGRES_PASSWORD: 1111
-      POSTGRES_HOST: db
-      POSTGRES_PORT: "5432"
-      ALLOWED_HOSTS: "localhost 127.0.0.1 0.0.0.0"
-
-      GUNICORN_WORKERS: "3"
-      GUNICORN_BIND: "0.0.0.0:8000"
-      GUNICORN_LOG_LEVEL: "info"
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
     command: /app/docker/entrypoint.sh
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://127.0.0.1:8000/ || exit 1"]

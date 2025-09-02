@@ -4,6 +4,10 @@ from django.urls import reverse_lazy
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+SECRET_KEY = os.getenv('SECRET_KEY')
+
+if not SECRET_KEY:
+    raise ValueError("Не задана переменная окружения SECRET_KEY")
 
 POSTGRES_DB = os.getenv("POSTGRES_DB")
 POSTGRES_USER = os.getenv("POSTGRES_USER")
@@ -11,11 +15,15 @@ POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
 POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
 POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5432")
 
-SECRET_KEY = 'django-insecure-3=v0x)tj)&^83@5w986bq5@_dh74nr48glcd8ohfdr1c!d8=zc'
+if not all([POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD]):
+    raise ValueError("Не заданы переменные окружения для подключения к PostgreSQL")
 
-DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
+
+DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1', 'yes')
+
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split()
+INTERNAL_IPS = [ip for ip in os.getenv('INTERNAL_IPS', '').split(',') if ip]
 
 
 INSTALLED_APPS = [
@@ -175,10 +183,5 @@ LOGIN_URL = reverse_lazy('MainApp:custom_login')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
-
-
-INTERNAL_IPS = [
-'127.0.0.1',
-    ]
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
