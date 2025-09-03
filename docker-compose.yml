@@ -14,6 +14,12 @@ services:
       timeout: 5s
       retries: 5
 
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   web:
     build: .
     depends_on:
@@ -38,6 +44,12 @@ services:
       retries: 5
     restart: unless-stopped
 
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   nginx:
     image: nginx:alpine
     ports:
@@ -50,7 +62,24 @@ services:
       - web
     restart: unless-stopped
 
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: always
+    ports:
+      - "9000:9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+
 volumes:
   postgres_data:
   static_volume:
   media_volume:
+  portainer_data:
